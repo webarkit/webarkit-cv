@@ -1,0 +1,24 @@
+{
+  "name": "webarkit-cv",
+  "version": "1.0.0",
+  "description": "a simple opencv package",
+  "main": "dist/webarkit.js",
+  "devDependencies": {
+    "@babel/core": "^7.21.0",
+    "@babel/plugin-transform-runtime": "^7.21.0",
+    "@babel/preset-env": "^7.20.2",
+    "babel-loader": "^9.1.2",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development --progress --watch"
+  },
+  "author": "Walter Perdan",
+  "license": "LGPL-3.0-or-later",
+  "dependencies": {
+    "@babel/runtime": "^7.21.0"
+  }
+}
