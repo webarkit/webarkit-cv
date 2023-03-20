@@ -1,6 +1,6 @@
 # webarkit-cv
 
-A set of tools to build a ccustom and light opencv lib to be used in WebAR projects. 
+A set of tools to build a custom and light opencv lib to be used in WebAR projects. This is a WIP and is not working yet.
 
 ## OpenCV and emsdk
 We are using OpenCV version 4.1.6 and emsdk 3.1.26
