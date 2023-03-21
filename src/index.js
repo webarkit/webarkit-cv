@@ -1,11 +1,12 @@
-import * as cv from '../build/opencv.js'
+import cv from '../build/opencv_js.js'
 
-export async function init() {
-   window.cv = await cv;
-   console.log(window.cv);
-   //var mat = cv.Mat()
-   //console.log(mat);
+export class WebARKit {
+   constructor() {
+      console.log('WebARKit');
+   }
+   async init() {
+      const opencv = await cv();
+      console.log(opencv);
+      return opencv;
+   }
 }
-
-
-//init()

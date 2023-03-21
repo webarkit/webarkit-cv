@@ -1,18 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>A simple example with webarkit-cv</title>
 </head>
+
 <body>
     <script src="../dist/webarkit.js"></script>
-    <script> 
-    console.log(WebARKit)
-   
-    //WebARKit.init()
+    <script>
+        console.log(WebARKit);
+
+        const webarkit = new WebARKit.WebARKit();
+
+        webarkit.init()
+            .then((cv) => {
+                console.log('init');
+                var mat = new cv.Mat(5, 5, cv.CV_8UC1);
+                console.log(mat);
+            })
     </script>
-    
+
 </body>
+
 </html>
