@@ -4,8 +4,8 @@ module.exports = {
   entry: './src/index.js',
   output: {
     path: path.resolve('dist'),
-    filename: 'WebARKit.js',
-    library: 'WebARKit',
+    filename: 'webarkitCV.js',
+    library: 'WebARKitCV',
     libraryTarget: 'umd',
     // @see: https://github.com/webpack/webpack/issues/3929
     //libraryExport: 'default',

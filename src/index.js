@@ -1,8 +1,8 @@
 import cv from '../build/opencv_js.js'
 
-export class WebARKit {
+export class WebARKitCV {
    constructor() {
-      console.log('WebARKit');
+      console.log('WebARKitCV');
    }
    async init() {
       const opencv = await cv();

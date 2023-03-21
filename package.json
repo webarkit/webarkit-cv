@@ -1,14 +1,14 @@
 {
   "name": "webarkit-cv",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "a simple opencv package",
-  "main": "dist/webarkit.js",
+  "main": "dist/webarkitCV.js",
   "devDependencies": {
-    "@babel/core": "^7.21.0",
+    "@babel/core": "^7.21.3",
     "@babel/plugin-transform-runtime": "^7.21.0",
     "@babel/preset-env": "^7.20.2",
     "babel-loader": "^9.1.2",
-    "webpack": "^5.75.0",
+    "webpack": "^5.76.2",
     "webpack-cli": "^5.0.1"
   },
   "scripts": {
