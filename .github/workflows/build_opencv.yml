@@ -33,11 +33,8 @@ jobs:
     - run: cp -r opencv_js/bin/opencv_js.js build
     - uses: actions/upload-artifact@v3
       with:
-        name: opencv_js
-        path: |
-          opencv_js/bin
-          !loader.js
-          !opencv.js
+        name: build
+        path: build
     - run: npm run build
     - uses: actions/upload-artifact@v3
       with:
