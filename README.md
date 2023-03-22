@@ -4,7 +4,7 @@ A set of tools to build a custom and light opencv lib to be used in WebAR projec
 The main goal of this project is to develop a WebAR library that can be used to build a Web AR application, based on the OpenCV library.
 
 ## OpenCV and emsdk
-We are using OpenCV version 4.6.0 and emsdk 3.1.26
+We are using OpenCV version 4.6.0 and emsdk 2.0.10
 
 ### Tools
 
