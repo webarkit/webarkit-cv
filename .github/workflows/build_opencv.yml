@@ -1,4 +1,4 @@
-name: Build jsartoolkitNFT CI
+name: Build OpenCV and webARKitCV libs
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch.
@@ -27,19 +27,16 @@ jobs:
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
-    - uses: actions/upload-artifact@v3
-      with:
-        name: opencv_js
-        path: |
-          opencv_js/
-          !build/libar.bc
-          !build/libar_simd.bc
     - run: git submodule update --init
     - run: npm install
     - run: docker run --rm -v $(pwd):/src -u $(id -u):$(id -g) -e "EMSCRIPTEN=/emsdk/upstream/emscripten"  emscripten/emsdk:2.0.10 emcmake python3 ./opencv/platforms/js/build_js.py opencv_js --config="./opencv.webarkit_config.py" --build_wasm --cmake_option="-DBUILD_opencv_dnn=OFF"  --cmake_option="-DBUILD_opencv_objdetect=OFF" --cmake_option="-DBUILD_opencv_photo=OFF" --build_flags="-s EXPORT_ES6=1 -s USE_ES6_IMPORT_META=0"
     - run: cp -r opencv_js/bin/opencv_js.js build
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
+      with:
+        name: build
+        path: build
+    - run: npm run build
+    - uses: actions/upload-artifact@v3
       with:
         name: dist
         path: dist
-    - run: npm run build      
