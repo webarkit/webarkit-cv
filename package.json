@@ -5,16 +5,18 @@
   "main": "dist/webarkitCV.js",
   "devDependencies": {
     "@babel/core": "^7.21.3",
-    "@babel/plugin-transform-runtime": "^7.21.0",
     "@babel/preset-env": "^7.20.2",
     "babel-loader": "^9.1.2",
+    "rimraf": "^4.4.1",
+    "typescript": "^5.0.2",
+    "ts-loader": "^9.4.2",
     "webpack": "^5.76.2",
     "webpack-cli": "^5.0.1"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --mode production",
-    "dev": "webpack --mode development --progress --watch"
+    "build-ts": "rimraf ./dist && tsc && webpack --mode production",
+    "dev-ts": "rimraf ./dist && tsc && webpack --mode development --progress --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Walter Perdan",
   "license": "LGPL-3.0-or-later",
