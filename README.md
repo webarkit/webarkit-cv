@@ -1,9 +1,10 @@
 # webarkit-cv
 
-A set of tools to build a custom and light opencv lib to be used in WebAR projects. This is a WIP, but at this moment it can import opencv_js.js as a **ES6** module.
+A set of tools to build a custom and light opencv lib to be used in WebAR projects. This is a WIP, but at this moment opencv_js.js can be imported as a **ES6** module.
+The main goal of this project is to develop a WebAR library that can be used to build a Web AR application, based on the OpenCV library.
 
 ## OpenCV and emsdk
-We are using OpenCV version 4.1.6 and emsdk 3.1.26
+We are using OpenCV version 4.6.0 and emsdk 3.1.26
 
 ### Tools
 
