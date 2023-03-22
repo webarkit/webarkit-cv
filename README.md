@@ -1,3 +1,8 @@
+![github releases](https://flat.badgen.net/github/release/webarkit/webarkit-cv)
+![github stars](https://flat.badgen.net/github/stars/webarkit/webarkit-cv)
+![github forks](https://flat.badgen.net/github/forks/webarkit/webarkit-cv)
+[![Build WebARKitCV](https://github.com/webarkit/webarkit-cv/actions/workflows/build_opencv.yml/badge.svg)](https://github.com/webarkit/webarkit-cv/actions/workflows/build_opencv.yml)
+
 # webarkit-cv
 
 A set of tools to build a custom and light opencv lib to be used in WebAR projects. This is a WIP, but at this moment opencv_js.js can be imported as a **ES6** module.
