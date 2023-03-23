@@ -3,3 +3,12 @@ export interface ITrackable {
     name: string;
     uuid: string;
 }
+export declare class Trackable implements ITrackable {
+    url: string;
+    name: string;
+    uuid: string;
+    constructor(url: string, name: string, uuid: string);
+}
+export interface ITrackables {
+    [key: number]: ITrackable;
+}

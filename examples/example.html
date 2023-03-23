@@ -16,10 +16,15 @@
         const webarkit = new WebARKitCV.WebARKitCV();
         console.log(webarkit);
 
-        webarkit.setWidth(20).setHeight(120)
+        webarkit.setWidth(20)
+        .setHeight(120)
+        .addTrackable("pinball", "../assets/pinball.jpg")
         
         const track = webarkit.build()
-        console.log(track);
+        // This only to test if opencv i initialized...
+        track.opencv.then(cv => {
+            console.log(cv);
+        });
             
     </script>
 

@@ -5,6 +5,7 @@ export class WebARKitBase {
        public width?: number,
        public height?: number,
        public trackable?: ITrackable,
+       public trackables?: Map<number, ITrackable>,
        public isLoaded?: boolean,
        public opencv?: any
     ) {}
