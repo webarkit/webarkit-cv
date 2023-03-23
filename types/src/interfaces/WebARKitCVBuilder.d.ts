@@ -12,5 +12,6 @@ export interface WebARKitCVBuilder {
     setWidth(width: number): WebARKitCVBuilder;
     setHeight(height: number): WebARKitCVBuilder;
     addTrackable(trackableName: string, trackableUrl: string): WebARKitCVBuilder;
+    loadTrackables(): WebARKitCVBuilder;
     build(): WebARKitBase;
 }

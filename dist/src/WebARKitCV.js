@@ -48,6 +48,10 @@ export class WebARKitCV {
         this.clear();
         return webarkit;
     }
+    async loadTrackables(webarkit) {
+        console.log(webarkit);
+        return this;
+    }
     clear() {
         this.webarkit = new WebARKitBase();
     }

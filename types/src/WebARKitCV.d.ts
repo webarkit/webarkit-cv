@@ -10,6 +10,7 @@ export declare class WebARKitCV implements WebARKitCVBuilder {
     addTrackable(trackableName: string, trackableUrl: string): WebARKitCVBuilder;
     private setIsLoaded;
     build(): WebARKitBase;
+    loadTrackables(): WebARKitCVBuilder;
     private clear;
     private initCV;
 }

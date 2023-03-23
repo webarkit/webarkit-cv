@@ -9,6 +9,3 @@ export declare class Trackable implements ITrackable {
     uuid: string;
     constructor(url: string, name: string, uuid: string);
 }
-export interface ITrackables {
-    [key: number]: ITrackable;
-}

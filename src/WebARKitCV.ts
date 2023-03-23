@@ -31,12 +31,12 @@ export class WebARKitCV implements WebARKitCVBuilder {
         return this;
     }
 
-    public addTrackable(trackableName: string, trackableUrl: string): WebARKitCVBuilder {       
-        if (typeof trackableName === 'string' && typeof trackableUrl === 'string' ) {        
-        this.webarkit!.trackable!.name = trackableName;
-        this.webarkit!.trackable!.url = trackableUrl;
-        this.webarkit!.trackable!.uuid = uuidv4();
-        this.webarkit!.trackables?.set(this.trackableCount++, this.webarkit!.trackable!);
+    public addTrackable(trackableName: string, trackableUrl: string): WebARKitCVBuilder {
+        if (typeof trackableName === 'string' && typeof trackableUrl === 'string') {
+            this.webarkit!.trackable!.name = trackableName;
+            this.webarkit!.trackable!.url = trackableUrl;
+            this.webarkit!.trackable!.uuid = uuidv4();
+            this.webarkit!.trackables?.set(this.trackableCount++, this.webarkit!.trackable!);
         } else {
             throw new Error('Trackable name and url must be strings');
         }
@@ -52,7 +52,18 @@ export class WebARKitCV implements WebARKitCVBuilder {
         const webarkit = this.webarkit;
         this.setIsLoaded(true);
         this.clear();
-        return webarkit
+        return webarkit;
+    }
+
+    public loadTrackables(): WebARKitCVBuilder {
+        const trackables = this.webarkit.trackables;
+        trackables!.forEach(trackable => {
+            this.webarkit.opencv.then((cv: any) => {
+                var data = cv.imread(trackable.name)
+                console.log(data);
+            });
+        });
+        return this
     }
 
     private clear(): void {

@@ -1,0 +1,3 @@
+"use strict";
+// nothing yet...
+//# sourceMappingURL=Worker.js.map
