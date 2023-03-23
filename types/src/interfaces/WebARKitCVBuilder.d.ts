@@ -3,9 +3,10 @@ export declare class WebARKitBase {
     width?: number | undefined;
     height?: number | undefined;
     trackable?: ITrackable | undefined;
+    trackables?: Map<number, ITrackable> | undefined;
     isLoaded?: boolean | undefined;
     opencv?: any;
-    constructor(width?: number | undefined, height?: number | undefined, trackable?: ITrackable | undefined, isLoaded?: boolean | undefined, opencv?: any);
+    constructor(width?: number | undefined, height?: number | undefined, trackable?: ITrackable | undefined, trackables?: Map<number, ITrackable> | undefined, isLoaded?: boolean | undefined, opencv?: any);
 }
 export interface WebARKitCVBuilder {
     setWidth(width: number): WebARKitCVBuilder;

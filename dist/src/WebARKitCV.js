@@ -1,15 +1,20 @@
 import cv from '../build/opencv_js';
 import { WebARKitBase } from './interfaces/WebARKitCVBuilder';
+import { Trackable } from "./interfaces/Trackables";
+import { v4 as uuidv4 } from "uuid";
 import packageJson from "../package.json";
 const { version } = packageJson;
 export class WebARKitCV {
     webarkit;
     version;
+    trackableCount = 0;
     constructor(webarkit) {
         this.version = version;
         console.info("WebARKitCV ", this.version);
         this.webarkit = webarkit;
         this.clear();
+        this.webarkit.trackable = new Trackable("", "", "");
+        this.webarkit.trackables = new Map();
         this.webarkit.opencv = this.initCV();
         this.webarkit.isLoaded = false;
     }
@@ -25,6 +30,8 @@ export class WebARKitCV {
         if (typeof trackableName === 'string' && typeof trackableUrl === 'string') {
             this.webarkit.trackable.name = trackableName;
             this.webarkit.trackable.url = trackableUrl;
+            this.webarkit.trackable.uuid = uuidv4();
+            this.webarkit.trackables?.set(this.trackableCount++, this.webarkit.trackable);
         }
         else {
             throw new Error('Trackable name and url must be strings');
@@ -46,7 +53,6 @@ export class WebARKitCV {
     }
     async initCV() {
         const opencv = await cv();
-        console.log(opencv);
         return opencv;
     }
 }
