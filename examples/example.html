@@ -9,6 +9,7 @@
 </head>
 
 <body>
+    <img src="pinball.jpg" id="pinball" style="display: none;">
     <script src="../dist/webarkitCV.js"></script>
     <script>
         console.log(WebARKitCV);
@@ -18,12 +19,15 @@
 
         webarkit.setWidth(20)
         .setHeight(120)
-        .addTrackable("pinball", "../assets/pinball.jpg")
+        .addTrackable("pinball", "./pinball.jpg")
+        .loadTrackables()
         
-        const track = webarkit.build()
+        const track = webarkit.build();
         // This only to test if opencv i initialized...
         track.opencv.then(cv => {
             console.log(cv);
+            var imgData = cv.imread("pinball")
+            console.log(imgData);
         });
             
     </script>
