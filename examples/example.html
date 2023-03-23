@@ -14,13 +14,13 @@
         console.log(WebARKitCV);
 
         const webarkit = new WebARKitCV.WebARKitCV();
+        console.log(webarkit);
 
-        webarkit.init()
-            .then((cv) => {
-                console.log('init');
-                var mat = new cv.Mat(5, 5, cv.CV_8UC1);
-                console.log(mat);
-            })
+        webarkit.setWidth(20).setHeight(120)
+        
+        const track = webarkit.build()
+        console.log(track);
+            
     </script>
 
 </body>
