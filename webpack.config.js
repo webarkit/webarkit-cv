@@ -8,7 +8,7 @@ module.exports = {
     library: 'WebARKitCV',
     libraryTarget: 'umd',
     // @see: https://github.com/webpack/webpack/issues/3929
-    //libraryExport: 'default',
+    libraryExport: 'default',
     // @see: https://github.com/webpack/webpack/issues/6522
     globalObject: 'typeof self !== \'undefined\' ? self : this',
   },
