@@ -1,6 +1,7 @@
 import cv from '../build/opencv_js';
 import { WebARKitBase } from './interfaces/WebARKitCVBuilder';
 import { Trackable } from "./interfaces/Trackables";
+import { WebARKitCVOrbWorker } from "./Workers/WebARKitCVWorkers";
 import { v4 as uuidv4 } from "uuid";
 import packageJson from "../package.json";
 const { version } = packageJson;
@@ -8,6 +9,7 @@ export class WebARKitCV {
     webarkit;
     version;
     trackableCount = 0;
+    trackableWorkers = [];
     constructor(webarkit) {
         this.version = version;
         console.info("WebARKitCV ", this.version);
@@ -48,8 +50,15 @@ export class WebARKitCV {
         this.clear();
         return webarkit;
     }
-    async loadTrackables(webarkit) {
-        console.log(webarkit);
+    loadTrackables() {
+        const trackables = this.webarkit.trackables;
+        trackables.forEach((trackable, index) => {
+            this.webarkit.opencv.then((cv) => {
+                var data = cv.imread(trackable.name);
+                this.trackableWorkers.push(new WebARKitCVOrbWorker(trackables, data.cols, data.rows, data.data, cv));
+                this.trackableWorkers[index].initialize();
+            });
+        });
         return this;
     }
     clear() {

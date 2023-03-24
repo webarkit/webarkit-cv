@@ -1,7 +1,7 @@
 import Worker from "worker-loader?inline=no-fallback!./Worker";
 import { ITrackable } from "../interfaces/Trackables";
 
-export abstract class AbstractWebARKitCVWorker{
+export abstract class AbstractWebARKitCVWorker {
     protected trackables: Map<number, ITrackable>;
     protected opencv: any;
     protected vw: number;
@@ -17,9 +17,15 @@ export abstract class AbstractWebARKitCVWorker{
 }
 
 export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
-    private worker: Worker | undefined;
-    constructor(trackables: Map<number, ITrackable>, width: number, height: number, opencv: any) {
-        super(trackables, width, height, opencv);        
+    private worker!: Worker;
+    private data: any;
+    private trackableWidth: number;
+    private trackableHeight: number;
+    constructor(trackables: Map<number, ITrackable>, width: number, height: number, data: any, opencv: any) {
+        super(trackables, width, height, opencv);
+        this.data = data;
+        this.trackableWidth = width;
+        this.trackableHeight = height;
     }
 
     public async initialize(): Promise<boolean> {
@@ -33,14 +39,14 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     }
 
     protected loadTrackables(): Promise<boolean> {
-        let imgWidth, imgHeight = 0;
-
-        this.worker!.postMessage({
-            type: "loadTrackable",
-            pw: imgWidth,
-            ph: imgHeight,
-            marker: this.trackables.get(0)!.url,
+        this.worker.postMessage({
+            type: "loadTrackables",
+            data: this.data,
+            trackableWidth: this.trackableWidth,
+            trackableHeight: this.trackableHeight
         });
         return Promise.resolve(true);
     }
- }
+}
+
+ //export default null as any;
