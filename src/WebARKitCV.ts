@@ -3,6 +3,7 @@ import { WebARKitCVBuilder } from './interfaces/WebARKitCVBuilder';
 import { WebARKitBase } from './interfaces/WebARKitCVBuilder';
 import { ITrackable, Trackable } from "./interfaces/Trackables";
 import { WebARKitCVOrbWorker } from "./Workers/WebARKitCVWorkers";
+import { imread } from './io/imgFunctions'
 import { v4 as uuidv4 } from "uuid";
 import packageJson from "../package.json";
 const { version } = packageJson;
@@ -60,13 +61,11 @@ export class WebARKitCV implements WebARKitCVBuilder {
     public loadTrackables(): WebARKitCVBuilder {
         const trackables = this.webarkit.trackables;
         trackables!.forEach((trackable, index: number) => {
-            this.webarkit.opencv.then((cv: any) => {
-                var data = cv.imread(trackable.name)
-                this.trackableWorkers.push(
-                    new WebARKitCVOrbWorker(trackables!, data.cols, data.rows,  data.data)  
-                );                
-                this.trackableWorkers![index].initialize();
-            });
+            var data = imread(trackable.name)
+            this.trackableWorkers.push(
+                new WebARKitCVOrbWorker(trackables!, data!.width, data!.height, data)
+            );
+            this.trackableWorkers![index].initialize();
         });
         return this
     }

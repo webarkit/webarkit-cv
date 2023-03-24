@@ -2,6 +2,7 @@ import cv from '../build/opencv_js';
 import { WebARKitBase } from './interfaces/WebARKitCVBuilder';
 import { Trackable } from "./interfaces/Trackables";
 import { WebARKitCVOrbWorker } from "./Workers/WebARKitCVWorkers";
+import { imread } from './io/imgFunctions';
 import { v4 as uuidv4 } from "uuid";
 import packageJson from "../package.json";
 const { version } = packageJson;
@@ -53,11 +54,9 @@ export class WebARKitCV {
     loadTrackables() {
         const trackables = this.webarkit.trackables;
         trackables.forEach((trackable, index) => {
-            this.webarkit.opencv.then((cv) => {
-                var data = cv.imread(trackable.name);
-                this.trackableWorkers.push(new WebARKitCVOrbWorker(trackables, data.cols, data.rows, data.data));
-                this.trackableWorkers[index].initialize();
-            });
+            var data = imread(trackable.name);
+            this.trackableWorkers.push(new WebARKitCVOrbWorker(trackables, data.width, data.height, data));
+            this.trackableWorkers[index].initialize();
         });
         return this;
     }
