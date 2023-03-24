@@ -33,7 +33,7 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
             type: "loadTrackables",
             data: this.data,
             trackableWidth: this.trackableWidth,
-            trackableHeight: this.trackableHeight
+            trackableHeight: this.trackableHeight,
         });
         return Promise.resolve(true);
     }

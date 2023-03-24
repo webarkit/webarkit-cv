@@ -1,4 +1,4 @@
-import { WebARKitCV } from './WebARKitCV';
+import { WebARKitCV } from "./WebARKitCV";
 declare const _default: {
     WebARKitCV: typeof WebARKitCV;
 };

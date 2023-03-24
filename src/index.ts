@@ -1,3 +1,3 @@
-import { WebARKitCV } from './WebARKitCV';
+import { WebARKitCV } from "./WebARKitCV";
 
-export default { WebARKitCV } 
+export default { WebARKitCV };
