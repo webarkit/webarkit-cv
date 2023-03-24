@@ -8,11 +8,30 @@
         "noImplicitAny": true,
         "module": "ESNext",
         "moduleResolution": "node",
-        "resolveJsonModule": true,                /* Include modules imported with '.json' extension */
-        "declaration": true,                     /* Generates corresponding '.d.ts' file. */
+        "resolveJsonModule": true, /* Include modules imported with '.json' extension */
+        "declaration": true, /* Generates corresponding '.d.ts' file. */
         "declarationDir": "./types",
         "target": "ESNext",
         "allowJs": true,
+    },
+    "lib": [
+        "WebWorker",
+        "esNext",
+        "dom",
+        "es5"
+    ],
+    "typedocOptions": {
+        "entryPoints": [
+            "src/index.ts",
+            "src/WebARKitCV.ts",
+            "src/Workers/WebARKitCVWorkers.ts",
+            "src/Workers/Worker.ts",
+            "src/Workers/worker-loader.d.ts",
+            "src/interfaces/Trackables.ts",
+            "src/interfaces/WebARKitCVBuilder.ts",
+            "src/io/imgFunctions.ts"
+        ],
+        "out": "docs"
     },
     "include": [
         "./src/**/*"
