@@ -55,7 +55,7 @@ export class WebARKitCV {
         trackables.forEach((trackable, index) => {
             this.webarkit.opencv.then((cv) => {
                 var data = cv.imread(trackable.name);
-                this.trackableWorkers.push(new WebARKitCVOrbWorker(trackables, data.cols, data.rows, data.data, cv));
+                this.trackableWorkers.push(new WebARKitCVOrbWorker(trackables, data.cols, data.rows, data.data));
                 this.trackableWorkers[index].initialize();
             });
         });

@@ -1,14 +1,12 @@
 import Worker from "worker-loader?inline=no-fallback!./Worker";
 export class AbstractWebARKitCVWorker {
     trackables;
-    opencv;
     vw;
     vh;
-    constructor(trackables, width, height, opencv) {
+    constructor(trackables, width, height) {
         this.trackables = trackables;
         this.vw = width;
         this.vh = height;
-        this.opencv = opencv;
     }
 }
 export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
@@ -16,8 +14,8 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     data;
     trackableWidth;
     trackableHeight;
-    constructor(trackables, width, height, data, opencv) {
-        super(trackables, width, height, opencv);
+    constructor(trackables, width, height, data) {
+        super(trackables, width, height);
         this.data = data;
         this.trackableWidth = width;
         this.trackableHeight = height;
