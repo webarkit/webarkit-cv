@@ -1,3 +1,8 @@
+/**
+ * Read image data from image source. ImageSource can be a canvas or an image id.
+ * @param {any} imageSource 
+ * @returns {ImageData} ImageData
+ */
 export function imread(imageSource: any) {
     var img = null ;
     if (typeof imageSource === 'string') {
@@ -26,7 +31,5 @@ export function imread(imageSource: any) {
         return;
     }
 
-    //var imgData = ctx!.getImageData(0, 0, canvas.width, canvas.height);
-    //return imgData;
     return ctx!.getImageData(0, 0, canvas.width, canvas.height);
 };

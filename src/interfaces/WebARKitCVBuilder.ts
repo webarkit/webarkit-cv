@@ -1,6 +1,15 @@
 import { ITrackable } from "./Trackables";
 
 export class WebARKitBase {
+  /**
+   * The WebARKitBase class is the base class for the WebARKitCV class. 
+   * This class is used to create a WebARKitCV object with the Builder pattern. 
+   * @param {number} width 
+   * @param {number} height 
+   * @param {ITrackable} trackable 
+   * @param {Map<number, ITrackable>} trackables 
+   * @param {boolean} isLoaded 
+   */
   constructor(
     public width?: number,
     public height?: number,
@@ -10,6 +19,10 @@ export class WebARKitBase {
   ) { }
 }
 
+/**
+ * @description
+ * The WebARKitCVBuilder interface is used to create a WebARKitCV object with the Builder pattern.
+ */
 export interface WebARKitCVBuilder {
   setWidth(width: number): WebARKitCVBuilder;
   setHeight(height: number): WebARKitCVBuilder;
