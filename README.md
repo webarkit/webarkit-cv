@@ -2,12 +2,16 @@
 ![github stars](https://flat.badgen.net/github/stars/webarkit/webarkit-cv)
 ![github forks](https://flat.badgen.net/github/forks/webarkit/webarkit-cv)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+[![CI WebARKitCV](https://github.com/webarkit/webarkit-cv/actions/workflows/CI.yml/badge.svg)](https://github.com/webarkit/webarkit-cv/actions/workflows/CI.yml)
 [![Build WebARKitCV](https://github.com/webarkit/webarkit-cv/actions/workflows/build_opencv.yml/badge.svg)](https://github.com/webarkit/webarkit-cv/actions/workflows/build_opencv.yml)
 
 # webarkit-cv
 
 A set of tools to build a custom and light opencv lib to be used in WebAR projects. This is a WIP, but at this moment opencv_js.js can be imported as a **ES6** module.
-The main goal of this project is to develop a WebAR library that can be used to build a Web AR application, based on the OpenCV library.
+The main goal of this project is to develop a WebAR library that can be used to build a WebAR application, based on the OpenCV library.
+
+## Typescript
+WebARKIitCV is developed in Typescript language; Type definitions are in `types` folder.
 
 ## OpenCV and emsdk
 We are using OpenCV version 4.6.0 and emsdk 2.0.10
@@ -20,7 +24,6 @@ The opencv_js.js file is based on a modified version of OpenCV that let you impo
 
 ### Future development
 
-- Typescript support
 - npm package
 - documentation
 - first WebAR example
