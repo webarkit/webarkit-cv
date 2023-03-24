@@ -3,14 +3,12 @@ import { ITrackable } from "../interfaces/Trackables";
 
 export abstract class AbstractWebARKitCVWorker {
     protected trackables: Map<number, ITrackable>;
-    protected opencv: any;
     protected vw: number;
     protected vh: number;
-    constructor(trackables: Map<number, ITrackable>, width: number, height: number, opencv: any) {
+    constructor(trackables: Map<number, ITrackable>, width: number, height: number) {
         this.trackables = trackables;
         this.vw = width;
         this.vh = height;
-        this.opencv = opencv;
     }
     abstract initialize(): Promise<boolean>;
     abstract process(): void;
@@ -21,8 +19,8 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     private data: any;
     private trackableWidth: number;
     private trackableHeight: number;
-    constructor(trackables: Map<number, ITrackable>, width: number, height: number, data: any, opencv: any) {
-        super(trackables, width, height, opencv);
+    constructor(trackables: Map<number, ITrackable>, width: number, height: number, data: any) {
+        super(trackables, width, height);
         this.data = data;
         this.trackableWidth = width;
         this.trackableHeight = height;

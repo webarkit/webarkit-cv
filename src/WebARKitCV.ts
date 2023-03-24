@@ -63,7 +63,7 @@ export class WebARKitCV implements WebARKitCVBuilder {
             this.webarkit.opencv.then((cv: any) => {
                 var data = cv.imread(trackable.name)
                 this.trackableWorkers.push(
-                    new WebARKitCVOrbWorker(trackables!, data.cols, data.rows,  data.data, cv)  
+                    new WebARKitCVOrbWorker(trackables!, data.cols, data.rows,  data.data)  
                 );                
                 this.trackableWorkers![index].initialize();
             });
