@@ -24,7 +24,7 @@ export declare class WebARKitCV implements WebARKitCVBuilder {
      * @param {string} version
      *
      */
-    constructor(webarkit: WebARKitBase);
+    constructor();
     /**
      * You can set the width of the video/image element as source of the tracking.
      * @param {number} width

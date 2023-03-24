@@ -31,10 +31,10 @@ export class WebARKitCV implements WebARKitCVBuilder {
    * @param {string} version
    *
    */
-  constructor(webarkit: WebARKitBase) {
+  constructor() {
     this.version = version;
     console.info("WebARKitCV ", this.version);
-    this.webarkit = webarkit;
+    this.webarkit = new WebARKitBase();
     this.clear();
     this.webarkit.trackable = new Trackable("", "", "");
     this.webarkit.trackables = new Map<number, ITrackable>();
