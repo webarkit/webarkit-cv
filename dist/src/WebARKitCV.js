@@ -1,4 +1,3 @@
-import cv from '../build/opencv_js';
 import { WebARKitBase } from './interfaces/WebARKitCVBuilder';
 import { Trackable } from "./interfaces/Trackables";
 import { WebARKitCVOrbWorker } from "./Workers/WebARKitCVWorkers";
@@ -18,7 +17,6 @@ export class WebARKitCV {
         this.clear();
         this.webarkit.trackable = new Trackable("", "", "");
         this.webarkit.trackables = new Map();
-        this.webarkit.opencv = this.initCV();
         this.webarkit.isLoaded = false;
     }
     setWidth(width) {
@@ -62,10 +60,6 @@ export class WebARKitCV {
     }
     clear() {
         this.webarkit = new WebARKitBase();
-    }
-    async initCV() {
-        const opencv = await cv();
-        return opencv;
     }
 }
 //# sourceMappingURL=WebARKitCV.js.map

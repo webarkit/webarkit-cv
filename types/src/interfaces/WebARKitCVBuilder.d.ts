@@ -5,8 +5,7 @@ export declare class WebARKitBase {
     trackable?: ITrackable | undefined;
     trackables?: Map<number, ITrackable> | undefined;
     isLoaded?: boolean | undefined;
-    opencv?: any;
-    constructor(width?: number | undefined, height?: number | undefined, trackable?: ITrackable | undefined, trackables?: Map<number, ITrackable> | undefined, isLoaded?: boolean | undefined, opencv?: any);
+    constructor(width?: number | undefined, height?: number | undefined, trackable?: ITrackable | undefined, trackables?: Map<number, ITrackable> | undefined, isLoaded?: boolean | undefined);
 }
 export interface WebARKitCVBuilder {
     setWidth(width: number): WebARKitCVBuilder;

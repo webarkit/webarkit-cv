@@ -1,4 +1,3 @@
-import cv from '../build/opencv_js'
 import { WebARKitCVBuilder } from './interfaces/WebARKitCVBuilder';
 import { WebARKitBase } from './interfaces/WebARKitCVBuilder';
 import { ITrackable, Trackable } from "./interfaces/Trackables";
@@ -20,7 +19,6 @@ export class WebARKitCV implements WebARKitCVBuilder {
         this.clear();
         this.webarkit.trackable = new Trackable("", "", "");
         this.webarkit.trackables = new Map<number, ITrackable>()
-        this.webarkit.opencv = this.initCV();
         this.webarkit.isLoaded = false;
     }
 
@@ -72,10 +70,5 @@ export class WebARKitCV implements WebARKitCVBuilder {
 
     private clear(): void {
         this.webarkit = new WebARKitBase();
-    }
-
-    private async initCV(): Promise<any> {
-        const opencv = await cv();
-        return opencv;
     }
 }

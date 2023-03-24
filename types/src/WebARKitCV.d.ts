@@ -13,5 +13,4 @@ export declare class WebARKitCV implements WebARKitCVBuilder {
     build(): WebARKitBase;
     loadTrackables(): WebARKitCVBuilder;
     private clear;
-    private initCV;
 }
