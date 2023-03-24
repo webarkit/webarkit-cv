@@ -3,13 +3,16 @@
     "version": "0.1.0",
     "description": "a simple opencv package",
     "main": "dist/webarkitCV.js",
+    "types": "types/src/index.d.ts",
     "devDependencies": {
         "@babel/core": "^7.21.3",
         "@babel/preset-env": "^7.20.2",
         "@types/uuid": "^9.0.1",
         "babel-loader": "^9.1.2",
+        "prettier": "^2.8.7",
         "rimraf": "^4.4.1",
         "ts-loader": "^9.4.2",
+        "typedoc": "^0.23.28",
         "typescript": "^5.0.2",
         "webpack": "^5.76.2",
         "webpack-cli": "^5.0.1",
@@ -18,7 +21,10 @@
     "scripts": {
         "build-ts": "rimraf ./dist && tsc && webpack --mode production",
         "dev-ts": "rimraf ./dist && tsc && webpack --mode development --progress --watch",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "docs": "typedoc",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "format-check": "prettier --check .",
+        "format": "prettier --write ."
     },
     "author": "Walter Perdan",
     "license": "LGPL-3.0-or-later",

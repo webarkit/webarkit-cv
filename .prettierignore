@@ -1,0 +1,14 @@
+# Ignore artifacts:
+build
+dist
+docs
+node_modules
+examples
+opencv
+opencv_js
+types
+*.html
+*.json
+*.js
+*.lock
+*.md

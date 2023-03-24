@@ -1,6 +1,7 @@
 ![github releases](https://flat.badgen.net/github/release/webarkit/webarkit-cv)
 ![github stars](https://flat.badgen.net/github/stars/webarkit/webarkit-cv)
 ![github forks](https://flat.badgen.net/github/forks/webarkit/webarkit-cv)
+[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 [![Build WebARKitCV](https://github.com/webarkit/webarkit-cv/actions/workflows/build_opencv.yml/badge.svg)](https://github.com/webarkit/webarkit-cv/actions/workflows/build_opencv.yml)
 
 # webarkit-cv

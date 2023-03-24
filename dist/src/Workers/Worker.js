@@ -1,4 +1,4 @@
-import cv from '../../build/opencv_js';
+import cv from "../../build/opencv_js";
 const ctx = self;
 ctx.onmessage = (e) => {
     const msg = e.data;
