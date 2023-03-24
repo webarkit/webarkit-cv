@@ -13,8 +13,14 @@ export class AbstractWebARKitCVWorker {
 }
 export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     worker;
-    constructor(trackables, width, height, opencv) {
+    data;
+    trackableWidth;
+    trackableHeight;
+    constructor(trackables, width, height, data, opencv) {
         super(trackables, width, height, opencv);
+        this.data = data;
+        this.trackableWidth = width;
+        this.trackableHeight = height;
     }
     async initialize() {
         console.log("WebARKitCVOrbWorker initialized");
@@ -25,14 +31,14 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
         console.log("WebARKitCVWorker process");
     }
     loadTrackables() {
-        let imgWidth, imgHeight = 0;
         this.worker.postMessage({
-            type: "loadTrackable",
-            pw: imgWidth,
-            ph: imgHeight,
-            marker: this.trackables.get(0).url,
+            type: "loadTrackables",
+            data: this.data,
+            trackableWidth: this.trackableWidth,
+            trackableHeight: this.trackableHeight
         });
         return Promise.resolve(true);
     }
 }
+//export default null as any;
 //# sourceMappingURL=WebARKitCVWorkers.js.map

@@ -10,7 +10,10 @@ export declare abstract class AbstractWebARKitCVWorker {
 }
 export declare class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     private worker;
-    constructor(trackables: Map<number, ITrackable>, width: number, height: number, opencv: any);
+    private data;
+    private trackableWidth;
+    private trackableHeight;
+    constructor(trackables: Map<number, ITrackable>, width: number, height: number, data: any, opencv: any);
     initialize(): Promise<boolean>;
     process(): void;
     protected loadTrackables(): Promise<boolean>;

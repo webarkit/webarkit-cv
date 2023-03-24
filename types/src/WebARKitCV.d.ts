@@ -4,6 +4,7 @@ export declare class WebARKitCV implements WebARKitCVBuilder {
     private webarkit;
     private version;
     private trackableCount;
+    private trackableWorkers;
     constructor(webarkit: WebARKitBase);
     setWidth(width: number): WebARKitCVBuilder;
     setHeight(height: number): WebARKitCVBuilder;
