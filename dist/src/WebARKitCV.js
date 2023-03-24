@@ -29,10 +29,10 @@ export class WebARKitCV {
      * @param {string} version
      *
      */
-    constructor(webarkit) {
+    constructor() {
         this.version = version;
         console.info("WebARKitCV ", this.version);
-        this.webarkit = webarkit;
+        this.webarkit = new WebARKitBase();
         this.clear();
         this.webarkit.trackable = new Trackable("", "", "");
         this.webarkit.trackables = new Map();
