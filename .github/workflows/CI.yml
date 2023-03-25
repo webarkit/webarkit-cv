@@ -35,3 +35,6 @@ jobs:
 
       - name: Check formatting
         run: npm run format-check
+
+      - name: Test with Jest
+        run: npm run test
