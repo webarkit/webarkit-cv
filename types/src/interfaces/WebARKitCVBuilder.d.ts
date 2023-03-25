@@ -1,9 +1,11 @@
 import { ITrackable } from "./Trackables";
+import { ITracker } from "./Trackers";
 export declare class WebARKitBase {
     width?: number | undefined;
     height?: number | undefined;
     trackable?: ITrackable | undefined;
     trackables?: Map<number, ITrackable> | undefined;
+    trackers?: Map<number, ITracker> | undefined;
     isLoaded?: boolean | undefined;
     /**
      * The WebARKitBase class is the base class for the WebARKitCV class.
@@ -12,9 +14,10 @@ export declare class WebARKitBase {
      * @param {number} height
      * @param {ITrackable} trackable
      * @param {Map<number, ITrackable>} trackables
+     * @param {Map<number, ITracker>} trackers
      * @param {boolean} isLoaded
      */
-    constructor(width?: number | undefined, height?: number | undefined, trackable?: ITrackable | undefined, trackables?: Map<number, ITrackable> | undefined, isLoaded?: boolean | undefined);
+    constructor(width?: number | undefined, height?: number | undefined, trackable?: ITrackable | undefined, trackables?: Map<number, ITrackable> | undefined, trackers?: Map<number, ITracker> | undefined, isLoaded?: boolean | undefined);
 }
 /**
  * @description

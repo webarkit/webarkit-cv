@@ -24,6 +24,11 @@
         
         const track = webarkit.build();
         console.log(track);
+        if(track.isLoaded) {
+            webarkit.track(track.trackers).then((t) => {
+                console.log(t);
+            })
+        }
             
     </script>
 

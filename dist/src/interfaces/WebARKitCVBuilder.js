@@ -3,6 +3,7 @@ export class WebARKitBase {
     height;
     trackable;
     trackables;
+    trackers;
     isLoaded;
     /**
      * The WebARKitBase class is the base class for the WebARKitCV class.
@@ -11,13 +12,15 @@ export class WebARKitBase {
      * @param {number} height
      * @param {ITrackable} trackable
      * @param {Map<number, ITrackable>} trackables
+     * @param {Map<number, ITracker>} trackers
      * @param {boolean} isLoaded
      */
-    constructor(width, height, trackable, trackables, isLoaded) {
+    constructor(width, height, trackable, trackables, trackers, isLoaded) {
         this.width = width;
         this.height = height;
         this.trackable = trackable;
         this.trackables = trackables;
+        this.trackers = trackers;
         this.isLoaded = isLoaded;
     }
 }
