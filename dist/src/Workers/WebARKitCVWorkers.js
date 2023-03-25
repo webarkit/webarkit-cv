@@ -14,6 +14,7 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     data;
     trackableWidth;
     trackableHeight;
+    _processing = false;
     constructor(trackables, width, height, data) {
         super(trackables, width, height);
         this.data = data;
@@ -25,8 +26,19 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
         this.worker = new Worker();
         return await this.loadTrackables();
     }
-    process() {
-        console.log("WebARKitCVWorker process");
+    /**
+     * This is the function that will pass the video stream to the worker.
+     * @param imageData the image data from the video stream.
+     * @returns void
+     */
+    process(imagedata) {
+        if (this._processing) {
+            return;
+        }
+        this._processing = true;
+        this.worker.postMessage({ type: "process", imagedata }, [
+            imagedata.data.buffer,
+        ]);
     }
     loadTrackables() {
         this.worker.postMessage({

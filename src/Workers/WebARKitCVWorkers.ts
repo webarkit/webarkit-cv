@@ -15,7 +15,7 @@ export abstract class AbstractWebARKitCVWorker {
     this.vh = height;
   }
   abstract initialize(): Promise<boolean>;
-  abstract process(): void;
+  abstract process(imagedata: ImageData): void;
 }
 
 export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
@@ -23,6 +23,7 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
   private data: any;
   private trackableWidth: number;
   private trackableHeight: number;
+  private _processing: boolean = false;
   constructor(
     trackables: Map<number, ITrackable>,
     width: number,
@@ -41,8 +42,20 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     return await this.loadTrackables();
   }
 
-  public process(): void {
-    console.log("WebARKitCVWorker process");
+  /**
+   * This is the function that will pass the video stream to the worker.
+   * @param imageData the image data from the video stream.
+   * @returns void
+   */
+  public process(imagedata: ImageData): void {
+    if (this._processing) {
+      return;
+    }
+    this._processing = true;
+
+    this.worker.postMessage({ type: "process", imagedata }, [
+      imagedata.data.buffer,
+    ]);
   }
 
   protected loadTrackables(): Promise<boolean> {

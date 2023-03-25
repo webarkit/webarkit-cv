@@ -5,12 +5,18 @@ const initCV = async () => {
 };
 var opencv;
 opencv = initCV();
+var next;
+let markerResult = null;
 ctx.onmessage = (e) => {
     const msg = e.data;
     switch (msg.type) {
         case "loadTrackables": {
             loadTrackables(msg);
             return;
+        }
+        case "process": {
+            next = msg.imagedata;
+            process(next);
         }
     }
 };
@@ -43,5 +49,98 @@ const loadTrackables = async (msg) => {
         noArray.delete();
         orb.delete();
     });
+};
+const process = (next) => {
+    markerResult = null;
+    /*if (ar && ar.process) {
+            ar.process(next);
+        }*/
+    detectAndCompute(next);
+    if (markerResult != null) {
+        ctx.postMessage(markerResult);
+    }
+    else {
+        ctx.postMessage({ type: "not found" });
+    }
+    next = null;
+};
+const detectAndCompute = (keyFrameImageData) => {
+    opencv.then((cv) => {
+        var videoSize = {
+            height: 480,
+            width: 640,
+        };
+        let srcVideo = new cv.Mat(videoSize.height, videoSize.width, cv.CV_8UC4);
+        var src = convertImageData(keyFrameImageData, srcVideo, cv, videoSize);
+        cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
+        let ksize = new cv.Size(BlurSize, BlurSize);
+        let anchor = new cv.Point(-1, -1);
+        cv.blur(src, src, ksize, anchor, cv.BORDER_DEFAULT);
+        var frame_keypoints_vector = new cv.KeyPointVector();
+        var frame_descriptors = new cv.Mat();
+        var orb = new cv.ORB();
+        var noArray = new cv.Mat();
+        orb.detectAndCompute(src, noArray, frame_keypoints_vector, frame_descriptors);
+        var knnMatches = new cv.DMatchVectorVector();
+        var matcher = new cv.BFMatcher();
+        matcher.knnMatch(frame_descriptors, template_descriptors, knnMatches, 2);
+        var frame_keypoints = [];
+        var template_keypoints = [];
+        var matchTotal = knnMatches.size();
+        for (var i = 0; i < matchTotal; i++) {
+            var point = knnMatches.get(i).get(0);
+            var point2 = knnMatches.get(i).get(1);
+            if (point.distance < 0.7 * point2.distance) {
+                var frame_point = frame_keypoints_vector.get(point.queryIdx).pt;
+                frame_keypoints.push(frame_point);
+                var template_point = template_keypoints_vector.get(point.trainIdx).pt;
+                template_keypoints.push(template_point);
+            }
+        }
+        var frameMat = new cv.Mat(frame_keypoints.length, 1, cv.CV_32FC2);
+        var templateMat = new cv.Mat(template_keypoints.length, 1, cv.CV_32FC2);
+        for (let i = 0; i < template_keypoints.length; i++) {
+            frameMat.data32F[i * 2] = frame_keypoints[i].x;
+            frameMat.data32F[i * 2 + 1] = frame_keypoints[i].y;
+            templateMat.data32F[i * 2] = template_keypoints[i].x;
+            templateMat.data32F[i * 2 + 1] = template_keypoints[i].y;
+        }
+        if (template_keypoints.length >= ValidPointTotal) {
+            var homography = cv.findHomography(templateMat, frameMat, cv.RANSAC);
+            homography_transform = homography.data64F;
+        }
+        else {
+            homography_transform = null;
+        }
+        noArray.delete();
+        orb.delete();
+        frame_keypoints_vector.delete();
+        frame_descriptors.delete();
+        knnMatches.delete();
+        matcher.delete();
+        templateMat.delete();
+        frameMat.delete();
+        src.delete();
+        frame_keypoints = null;
+        template_keypoints = null;
+        return {
+            prediction: homography_transform,
+        };
+    });
+};
+const convertImageData = (imageData, frame, cv, videoSize) => {
+    if (!(frame instanceof cv.Mat)) {
+        throw new Error("Please input the valid cv.Mat instance.");
+        return;
+    }
+    if (frame.type() !== cv.CV_8UC4) {
+        throw new Error("Bad type of input mat: the type should be cv.CV_8UC4.");
+        return;
+    }
+    if (frame.cols !== videoSize.width || frame.rows !== videoSize.height) {
+        throw new Error("Bad size of input mat: the size should be same as the video.");
+        return;
+    }
+    return frame.data.set(imageData.data);
 };
 //# sourceMappingURL=Worker.js.map

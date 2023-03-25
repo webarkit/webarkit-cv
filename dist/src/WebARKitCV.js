@@ -115,9 +115,19 @@ export class WebARKitCV {
         this.clear();
         return webarkit;
     }
-    async track(trackers) {
+    async track(trackers, imgData) {
         console.info("Start tracking!");
         try {
+            this.trackableWorkers.forEach((trackable) => {
+                trackable.process(imgData);
+            });
+            let _update = () => {
+                if (true) {
+                    this.trackableWorkers.forEach((trackable) => trackable.process(imgData));
+                }
+                requestAnimationFrame(_update);
+            };
+            _update();
             return Promise.resolve(trackers);
         }
         catch (e) {

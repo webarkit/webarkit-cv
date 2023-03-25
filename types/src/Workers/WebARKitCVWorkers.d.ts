@@ -5,15 +5,21 @@ export declare abstract class AbstractWebARKitCVWorker {
     protected vh: number;
     constructor(trackables: Map<number, ITrackable>, width: number, height: number);
     abstract initialize(): Promise<boolean>;
-    abstract process(): void;
+    abstract process(imagedata: ImageData): void;
 }
 export declare class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     private worker;
     private data;
     private trackableWidth;
     private trackableHeight;
+    private _processing;
     constructor(trackables: Map<number, ITrackable>, width: number, height: number, data: any);
     initialize(): Promise<boolean>;
-    process(): void;
+    /**
+     * This is the function that will pass the video stream to the worker.
+     * @param imageData the image data from the video stream.
+     * @returns void
+     */
+    process(imagedata: ImageData): void;
     protected loadTrackables(): Promise<boolean>;
 }

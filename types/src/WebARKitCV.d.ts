@@ -64,7 +64,7 @@ export declare class WebARKitCV implements WebARKitCVBuilder {
      * @returns {WebARKitBase}
      */
     build(): WebARKitBase;
-    track(trackers: Map<number, ITracker>): Promise<Map<number, ITracker>>;
+    track(trackers: Map<number, ITracker>, imgData: ImageData): Promise<Map<number, ITracker>>;
     /**
      * Clear the WebARKitCV object. Used internally.
      */

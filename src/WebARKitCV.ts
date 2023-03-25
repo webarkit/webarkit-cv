@@ -4,6 +4,7 @@ import { ITrackable, Trackable } from "./interfaces/Trackables";
 import { ITracker } from "./interfaces/Trackers";
 import { WebARKitCVOrbWorker } from "./Workers/WebARKitCVWorkers";
 import { imread } from "./io/imgFunctions";
+import { VideoCapture } from "./io/VideoCapture";
 import { v4 as uuidv4 } from "uuid";
 import packageJson from "../package.json";
 const { version } = packageJson;
@@ -133,10 +134,24 @@ export class WebARKitCV implements WebARKitCVBuilder {
   }
 
   public async track(
-    trackers: Map<number, ITracker>
+    trackers: Map<number, ITracker>,
+    imgData: ImageData
   ): Promise<Map<number, ITracker>> {
     console.info("Start tracking!");
     try {
+      let imgData: any = VideoCapture("video");
+
+      let _update = () => {
+        if (true) {
+          this.trackableWorkers.forEach((trackable) =>
+            trackable.process(imgData)
+          );
+        }
+        requestAnimationFrame(_update);
+      };
+
+      _update();
+
       return Promise.resolve(trackers);
     } catch (e) {
       console.error(e);
