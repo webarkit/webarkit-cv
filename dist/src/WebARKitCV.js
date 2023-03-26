@@ -2,15 +2,10 @@ import { WebARKitBase } from "./interfaces/WebARKitCVBuilder";
 import { Trackable } from "./interfaces/Trackables";
 import { WebARKitCVOrbWorker } from "./Workers/WebARKitCVWorkers";
 import { imread } from "./io/imgFunctions";
-import { VideoCapture } from "./io/VideoCapture";
-import { CameraViewRenderer } from "./io/CameraViewRenderer";
 import { v4 as uuidv4 } from "uuid";
 import packageJson from "../package.json";
 const { version } = packageJson;
 export class WebARKitCV {
-    cameraView;
-    video;
-    videoSettingData;
     webarkit;
     version;
     trackableCount = 0;
@@ -34,7 +29,7 @@ export class WebARKitCV {
      * @param {string} version
      *
      */
-    constructor(video) {
+    constructor() {
         this.version = version;
         console.info("WebARKitCV ", this.version);
         this.webarkit = new WebARKitBase();
@@ -43,14 +38,6 @@ export class WebARKitCV {
         this.webarkit.trackables = new Map();
         this.webarkit.trackers = new Map();
         this.webarkit.isLoaded = false;
-        this.video = video;
-        this.cameraView = new CameraViewRenderer(this.video);
-        this.videoSettingData = {
-            width: { min: 640, max: 800 },
-            height: { min: 480, max: 600 },
-            facingMode: "environment",
-            targetFrameRate: 60
-        };
     }
     /**
      * You can set the width of the video/image element as source of the tracking.
@@ -98,7 +85,7 @@ export class WebARKitCV {
         const trackables = this.webarkit.trackables;
         trackables.forEach((trackable, index) => {
             var data = imread(trackable.name);
-            this.trackableWorkers.push(new WebARKitCVOrbWorker(trackables, data.width, data.height, data));
+            this.trackableWorkers.push(new WebARKitCVOrbWorker(trackables, this.webarkit.width, this.webarkit.height, data.width, data.height, data));
             this.webarkit.trackers?.set(index, {
                 name: trackable.name,
                 uuid: trackable.uuid,
@@ -106,7 +93,6 @@ export class WebARKitCV {
             });
             this.trackableWorkers[index].initialize();
         });
-        this.cameraView.initialize(this.videoSettingData);
         return this;
     }
     /**
@@ -132,10 +118,11 @@ export class WebARKitCV {
     async track(trackers, imgData) {
         console.info("Start tracking!");
         try {
-            let imgData = VideoCapture("video");
             let _update = () => {
                 if (true) {
-                    this.trackableWorkers.forEach((trackable) => trackable.process(imgData));
+                    this.trackableWorkers.forEach((trackable) => {
+                        trackable.process(imgData);
+                    });
                 }
                 requestAnimationFrame(_update);
             };

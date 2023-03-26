@@ -98,7 +98,7 @@ export class WebARKitCV implements WebARKitCVBuilder {
     trackables!.forEach((trackable, index: number) => {
       var data = imread(trackable.name);
       this.trackableWorkers.push(
-        new WebARKitCVOrbWorker(trackables!, data!.width, data!.height, data)
+        new WebARKitCVOrbWorker(trackables!, this.webarkit.width, this.webarkit.height, data!.width, data!.height, data)
       );
       this.webarkit.trackers?.set(index, {
         name: trackable.name,

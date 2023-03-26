@@ -102,7 +102,9 @@ export class CameraViewRenderer {
     get image() {
         const now = Date.now();
         if (now - this.lastCache > 1000 / this.targetFrameRate) {
+            console.log(this.video);
             this.context_process.drawImage(this.video, 0, 0, this.vw, this.vh, this.ox, this.oy, this.w, this.h);
+            console.log(this.context_process);
             const imageData = this.context_process.getImageData(0, 0, this.pw, this.ph);
             if (this.imageDataCache == null) {
                 this.imageDataCache = imageData.data;

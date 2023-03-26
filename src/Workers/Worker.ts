@@ -21,7 +21,7 @@ ctx.onmessage = (e: MessageEvent<any>) => {
     }
     case "process": {
       next = msg.imagedata;
-      process(next);
+      process(msg);
     }
   }
 };
@@ -43,7 +43,12 @@ const loadTrackables = async (msg: any) => {
     let src = msg.data;
     let refRows = msg.trackableHeight;
     let refCols = msg.trackableWidth;
-    let mat = new cv.matFromArray(refRows, refCols, cv.CV_8UC4, src);
+    //let mat = new cv.matFromArray(refRows, refCols, cv.CV_8UC4, src);
+    //var mat = new cv.Mat(imageData.height, imageData.width, cv.CV_8UC4);
+    let mat = new cv.Mat(refRows, refCols, cv.CV_8UC4);
+    //mat.data.set(imageData.data);
+    mat.data.set(src.data);
+    console.log(mat);
 
     cv.cvtColor(mat, mat, cv.COLOR_RGBA2GRAY, 0);
 
@@ -65,6 +70,11 @@ const loadTrackables = async (msg: any) => {
       template_descriptors
     );
 
+    console.log(template_descriptors.cols);
+
+    console.log(template_keypoints_vector);
+    
+
     corners[0] = new cv.Point(0, 0);
     corners[1] = new cv.Point(refCols, 0);
     corners[2] = new cv.Point(refCols, refRows);
@@ -76,10 +86,10 @@ const loadTrackables = async (msg: any) => {
   });
 };
 
-const process = (next: ImageData) => {
+const process = (msg: any) => {
   markerResult = null;
 
-  track(next);
+  track(msg);
 
   if (markerResult != null) {
     ctx.postMessage(markerResult);
@@ -89,15 +99,12 @@ const process = (next: ImageData) => {
   next = <ImageData>(<unknown>null);
 };
 
-const track = (keyFrameImageData: any) => {
+const track = (msg: any) => {
   opencv.then((cv: any) => {
-    var videoSize = {
-      height: 480,
-      width: 640,
-    };
+    const keyFrameImageData = msg.imagedata
     let src = new cv.matFromArray(
-      videoSize.height,
-      videoSize.width,
+      msg.vHeight,
+      msg.vWidth,
       cv.CV_8UC4,
       keyFrameImageData
     );
@@ -134,6 +141,9 @@ const track = (keyFrameImageData: any) => {
     var template_keypoints = [];
 
     var matchTotal = knnMatches.size();
+  
+    console.log("matchTotal: ", matchTotal);
+    
     for (var i = 0; i < matchTotal; i++) {
       var point = knnMatches.get(i).get(0);
       var point2 = knnMatches.get(i).get(1);

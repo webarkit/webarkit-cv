@@ -13,7 +13,7 @@ export declare class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     private trackableWidth;
     private trackableHeight;
     private _processing;
-    constructor(trackables: Map<number, ITrackable>, width: number, height: number, data: any);
+    constructor(trackables: Map<number, ITrackable>, vwidth: number, vheight: number, twidth: number, theight: number, data: any);
     initialize(): Promise<boolean>;
     /**
      * This is the function that will pass the video stream to the worker.

@@ -16,7 +16,7 @@ ctx.onmessage = (e) => {
         }
         case "process": {
             next = msg.imagedata;
-            process(next);
+            process(msg);
         }
     }
 };
@@ -31,7 +31,12 @@ const loadTrackables = async (msg) => {
         let src = msg.data;
         let refRows = msg.trackableHeight;
         let refCols = msg.trackableWidth;
-        let mat = new cv.matFromArray(refRows, refCols, cv.CV_8UC4, src);
+        //let mat = new cv.matFromArray(refRows, refCols, cv.CV_8UC4, src);
+        //var mat = new cv.Mat(imageData.height, imageData.width, cv.CV_8UC4);
+        let mat = new cv.Mat(refRows, refCols, cv.CV_8UC4);
+        //mat.data.set(imageData.data);
+        mat.data.set(src.data);
+        console.log(mat);
         cv.cvtColor(mat, mat, cv.COLOR_RGBA2GRAY, 0);
         let ksize = new cv.Size(BlurSize, BlurSize);
         let anchor = new cv.Point(-1, -1);
@@ -41,6 +46,8 @@ const loadTrackables = async (msg) => {
         let noArray = new cv.Mat();
         let orb = new cv.ORB(3000);
         orb.detectAndCompute(mat, noArray, template_keypoints_vector, template_descriptors);
+        console.log(template_descriptors.cols);
+        console.log(template_keypoints_vector);
         corners[0] = new cv.Point(0, 0);
         corners[1] = new cv.Point(refCols, 0);
         corners[2] = new cv.Point(refCols, refRows);
@@ -50,9 +57,9 @@ const loadTrackables = async (msg) => {
         orb.delete();
     });
 };
-const process = (next) => {
+const process = (msg) => {
     markerResult = null;
-    detectAndCompute(next);
+    track(msg);
     if (markerResult != null) {
         ctx.postMessage(markerResult);
     }
@@ -61,16 +68,10 @@ const process = (next) => {
     }
     next = null;
 };
-const detectAndCompute = (keyFrameImageData) => {
+const track = (msg) => {
     opencv.then((cv) => {
-        var videoSize = {
-            height: 480,
-            width: 640,
-        };
-        //let srcVideo = new cv.Mat(videoSize.height, videoSize.width, cv.CV_8UC4);
-        //var src = convertImageData(keyFrameImageData, srcVideo, cv, videoSize);
-        let src = new cv.matFromArray(videoSize.height, videoSize.width, cv.CV_8UC4, keyFrameImageData);
-        console.log(src);
+        const keyFrameImageData = msg.imagedata;
+        let src = new cv.matFromArray(msg.vHeight, msg.vWidth, cv.CV_8UC4, keyFrameImageData);
         cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
         let ksize = new cv.Size(BlurSize, BlurSize);
         let anchor = new cv.Point(-1, -1);
@@ -86,6 +87,7 @@ const detectAndCompute = (keyFrameImageData) => {
         var frame_keypoints = [];
         var template_keypoints = [];
         var matchTotal = knnMatches.size();
+        console.log("matchTotal: ", matchTotal);
         for (var i = 0; i < matchTotal; i++) {
             var point = knnMatches.get(i).get(0);
             var point2 = knnMatches.get(i).get(1);
@@ -122,25 +124,10 @@ const detectAndCompute = (keyFrameImageData) => {
         src.delete();
         frame_keypoints = null;
         template_keypoints = null;
+        console.log("Homograpy from orb detector: ", homography_transform);
         /*return {
           prediction: homography_transform,
         };*/
     });
-};
-const convertImageData = (imageData, frame, cv, videoSize) => {
-    if (!(frame instanceof cv.Mat)) {
-        throw new Error("Please input the valid cv.Mat instance.");
-        return;
-    }
-    if (frame.type() !== cv.CV_8UC4) {
-        throw new Error("Bad type of input mat: the type should be cv.CV_8UC4.");
-        return;
-    }
-    if (frame.cols !== videoSize.width || frame.rows !== videoSize.height) {
-        throw new Error("Bad size of input mat: the size should be same as the video.");
-        return;
-    }
-    console.log(imageData);
-    return frame.data.set(imageData.data);
 };
 //# sourceMappingURL=Worker.js.map

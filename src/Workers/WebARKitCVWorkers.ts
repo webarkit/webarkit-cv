@@ -26,14 +26,16 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
   private _processing: boolean = false;
   constructor(
     trackables: Map<number, ITrackable>,
-    width: number,
-    height: number,
+    vwidth: number,
+    vheight: number,
+    twidth: number,
+    theight: number,
     data: any
   ) {
-    super(trackables, width, height);
+    super(trackables, vwidth, vheight);
     this.data = data;
-    this.trackableWidth = width;
-    this.trackableHeight = height;
+    this.trackableWidth = twidth;
+    this.trackableHeight = theight;
   }
 
   public async initialize(): Promise<boolean> {
@@ -53,9 +55,8 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     }
     this._processing = true;
 
-    this.worker.postMessage({ type: "process", imagedata }, [
-      imagedata.data.buffer,
-    ]);
+    this.worker.postMessage({ type: "process", imagedata: imagedata.data.buffer,  vWidth: this.vw,
+    vHeight: this.vh});
   }
 
   protected loadTrackables(): Promise<boolean> {
