@@ -1,3 +1,4 @@
 import { WebARKitCV } from "./WebARKitCV";
+import { CameraViewRenderer } from "./io/CameraViewRenderer";
 
-export default { WebARKitCV };
+export default { WebARKitCV, CameraViewRenderer };

@@ -52,9 +52,6 @@ const loadTrackables = async (msg) => {
 };
 const process = (next) => {
     markerResult = null;
-    /*if (ar && ar.process) {
-            ar.process(next);
-        }*/
     detectAndCompute(next);
     if (markerResult != null) {
         ctx.postMessage(markerResult);
@@ -70,8 +67,10 @@ const detectAndCompute = (keyFrameImageData) => {
             height: 480,
             width: 640,
         };
-        let srcVideo = new cv.Mat(videoSize.height, videoSize.width, cv.CV_8UC4);
-        var src = convertImageData(keyFrameImageData, srcVideo, cv, videoSize);
+        //let srcVideo = new cv.Mat(videoSize.height, videoSize.width, cv.CV_8UC4);
+        //var src = convertImageData(keyFrameImageData, srcVideo, cv, videoSize);
+        let src = new cv.matFromArray(videoSize.height, videoSize.width, cv.CV_8UC4, keyFrameImageData);
+        console.log(src);
         cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
         let ksize = new cv.Size(BlurSize, BlurSize);
         let anchor = new cv.Point(-1, -1);
@@ -123,9 +122,9 @@ const detectAndCompute = (keyFrameImageData) => {
         src.delete();
         frame_keypoints = null;
         template_keypoints = null;
-        return {
-            prediction: homography_transform,
-        };
+        /*return {
+          prediction: homography_transform,
+        };*/
     });
 };
 const convertImageData = (imageData, frame, cv, videoSize) => {
@@ -141,6 +140,7 @@ const convertImageData = (imageData, frame, cv, videoSize) => {
         throw new Error("Bad size of input mat: the size should be same as the video.");
         return;
     }
+    console.log(imageData);
     return frame.data.set(imageData.data);
 };
 //# sourceMappingURL=Worker.js.map

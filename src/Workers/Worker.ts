@@ -79,7 +79,7 @@ const loadTrackables = async (msg: any) => {
 const process = (next: ImageData) => {
   markerResult = null;
 
-  detectAndCompute(next);
+  track(next);
 
   if (markerResult != null) {
     ctx.postMessage(markerResult);
@@ -89,21 +89,18 @@ const process = (next: ImageData) => {
   next = <ImageData>(<unknown>null);
 };
 
-const detectAndCompute = (keyFrameImageData: any) => {
+const track = (keyFrameImageData: any) => {
   opencv.then((cv: any) => {
     var videoSize = {
       height: 480,
       width: 640,
     };
-    //let srcVideo = new cv.Mat(videoSize.height, videoSize.width, cv.CV_8UC4);
-    //var src = convertImageData(keyFrameImageData, srcVideo, cv, videoSize);
     let src = new cv.matFromArray(
       videoSize.height,
       videoSize.width,
       cv.CV_8UC4,
       keyFrameImageData
     );
-    console.log(src);
 
     cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
 
@@ -180,33 +177,10 @@ const detectAndCompute = (keyFrameImageData: any) => {
     frame_keypoints = <any>(<unknown>null);
     template_keypoints = <any>(<unknown>null);
 
+    console.log("Homograpy from orb detector: ", homography_transform);
+
     /*return {
       prediction: homography_transform,
     };*/
   });
-};
-
-const convertImageData = (
-  imageData: ImageData,
-  frame: any,
-  cv: any,
-  videoSize: any
-) => {
-  if (!(frame instanceof cv.Mat)) {
-    throw new Error("Please input the valid cv.Mat instance.");
-    return;
-  }
-  if (frame.type() !== cv.CV_8UC4) {
-    throw new Error("Bad type of input mat: the type should be cv.CV_8UC4.");
-    return;
-  }
-  if (frame.cols !== videoSize.width || frame.rows !== videoSize.height) {
-    throw new Error(
-      "Bad size of input mat: the size should be same as the video."
-    );
-    return;
-  }
-  console.log(imageData);
-
-  return frame.data.set(imageData.data);
 };
