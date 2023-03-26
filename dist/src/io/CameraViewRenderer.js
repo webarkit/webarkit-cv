@@ -53,7 +53,9 @@ export class CameraViewRenderer {
     lastCache = 0;
     constructor(video) {
         this.canvas_process = document.createElement("canvas");
-        this.context_process = this.canvas_process.getContext("2d", { alpha: false });
+        this.context_process = this.canvas_process.getContext("2d", {
+            alpha: false,
+        });
         this._video = video;
         this.target = window || global;
         this._frame = 0;
@@ -144,7 +146,10 @@ export class CameraViewRenderer {
                     audio: false,
                     video: {
                         facingMode: this._facing,
-                        width: { min: videoSettings.width.min, max: videoSettings.width.max },
+                        width: {
+                            min: videoSettings.width.min,
+                            max: videoSettings.width.max,
+                        },
                     },
                 };
                 if (navigator.mediaDevices.enumerateDevices) {
@@ -157,7 +162,9 @@ export class CameraViewRenderer {
                         }
                     });
                     if (videoDevices.length > 1) {
-                        hint.video.deviceId = { exact: videoDevices[videoDevices.length - 1] };
+                        hint.video.deviceId = {
+                            exact: videoDevices[videoDevices.length - 1],
+                        };
                     }
                 }
                 const stream = await navigator.mediaDevices.getUserMedia(hint);

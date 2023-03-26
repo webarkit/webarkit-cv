@@ -43,25 +43,24 @@ const loadTrackables = async (msg: any) => {
     let src = msg.data;
     let refRows = msg.trackableHeight;
     let refCols = msg.trackableWidth;
-    //let mat = new cv.matFromArray(refRows, refCols, cv.CV_8UC4, src);
-    //var mat = new cv.Mat(imageData.height, imageData.width, cv.CV_8UC4);
+
     let mat = new cv.Mat(refRows, refCols, cv.CV_8UC4);
-    //mat.data.set(imageData.data);
+
     mat.data.set(src.data);
     console.log(mat);
 
-    cv.cvtColor(mat, mat, cv.COLOR_RGBA2GRAY, 0);
+    cv.cvtColor(mat, mat, cv.COLOR_RGBA2GRAY);
 
     let ksize = new cv.Size(BlurSize, BlurSize);
     let anchor = new cv.Point(-1, -1);
-    cv.blur(mat, mat, ksize, anchor, cv.BORDER_DEFAULT);
+    //cv.blur(mat, mat, ksize, anchor, cv.BORDER_DEFAULT);
     template_keypoints_vector = new cv.KeyPointVector();
 
     template_descriptors = new cv.Mat();
 
     let noArray = new cv.Mat();
 
-    let orb = new cv.ORB(3000);
+    let orb = new cv.ORB(10000);
 
     orb.detectAndCompute(
       mat,
@@ -101,24 +100,23 @@ const process = (msg: any) => {
 const track = (msg: any) => {
   opencv.then((cv: any) => {
     const keyFrameImageData = msg.imagedata;
-    let src = new cv.matFromArray(
-      msg.vHeight,
-      msg.vWidth,
-      cv.CV_8UC4,
-      keyFrameImageData
-    );
 
-    cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
+    let src = new cv.Mat(msg.vHeight, msg.vWidth, cv.CV_8UC4);
+
+    src.data.set(keyFrameImageData);
+    console.log(src);
+
+    cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
 
     let ksize = new cv.Size(BlurSize, BlurSize);
     let anchor = new cv.Point(-1, -1);
-    cv.blur(src, src, ksize, anchor, cv.BORDER_DEFAULT);
+    //cv.blur(src, src, ksize, anchor, cv.BORDER_DEFAULT);
 
     var frame_keypoints_vector = new cv.KeyPointVector();
 
     var frame_descriptors = new cv.Mat();
 
-    var orb = new cv.ORB();
+    var orb = new cv.ORB(10000);
 
     var noArray = new cv.Mat();
 
@@ -150,11 +148,16 @@ const track = (msg: any) => {
       if (point.distance < 0.7 * point2.distance) {
         var frame_point = frame_keypoints_vector.get(point.queryIdx).pt;
         frame_keypoints.push(frame_point);
+        //console.log("frame point: ",frame_point);
 
         var template_point = template_keypoints_vector.get(point.trainIdx).pt;
+        console.log("templat point: ", template_point);
+
         template_keypoints.push(template_point);
       }
     }
+
+    //console.log(frame_keypoints.length);
 
     var frameMat = new cv.Mat(frame_keypoints.length, 1, cv.CV_32FC2);
     var templateMat = new cv.Mat(template_keypoints.length, 1, cv.CV_32FC2);
@@ -166,6 +169,8 @@ const track = (msg: any) => {
       templateMat.data32F[i * 2] = template_keypoints[i].x;
       templateMat.data32F[i * 2 + 1] = template_keypoints[i].y;
     }
+
+    //console.log(template_keypoints.length);
 
     if (template_keypoints.length >= ValidPointTotal) {
       var homography = cv.findHomography(templateMat, frameMat, cv.RANSAC);
@@ -186,10 +191,6 @@ const track = (msg: any) => {
     frame_keypoints = <any>(<unknown>null);
     template_keypoints = <any>(<unknown>null);
 
-    console.log("Homograpy from orb detector: ", homography_transform);
-
-    /*return {
-      prediction: homography_transform,
-    };*/
+    console.log("Homography from orb detector: ", homography_transform);
   });
 };

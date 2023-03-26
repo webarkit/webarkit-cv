@@ -36,8 +36,12 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
             return;
         }
         this._processing = true;
-        this.worker.postMessage({ type: "process", imagedata: imagedata.data.buffer, vWidth: this.vw,
-            vHeight: this.vh });
+        this.worker.postMessage({
+            type: "process",
+            imagedata: imagedata.data.buffer,
+            vWidth: this.vw,
+            vHeight: this.vh,
+        });
     }
     loadTrackables() {
         this.worker.postMessage({
