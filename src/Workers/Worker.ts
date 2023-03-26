@@ -73,7 +73,6 @@ const loadTrackables = async (msg: any) => {
     console.log(template_descriptors.cols);
 
     console.log(template_keypoints_vector);
-    
 
     corners[0] = new cv.Point(0, 0);
     corners[1] = new cv.Point(refCols, 0);
@@ -101,7 +100,7 @@ const process = (msg: any) => {
 
 const track = (msg: any) => {
   opencv.then((cv: any) => {
-    const keyFrameImageData = msg.imagedata
+    const keyFrameImageData = msg.imagedata;
     let src = new cv.matFromArray(
       msg.vHeight,
       msg.vWidth,
@@ -141,9 +140,9 @@ const track = (msg: any) => {
     var template_keypoints = [];
 
     var matchTotal = knnMatches.size();
-  
+
     console.log("matchTotal: ", matchTotal);
-    
+
     for (var i = 0; i < matchTotal; i++) {
       var point = knnMatches.get(i).get(0);
       var point2 = knnMatches.get(i).get(1);

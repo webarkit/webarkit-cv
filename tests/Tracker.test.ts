@@ -11,7 +11,7 @@ describe("A simple test for the Tracker class", () => {
 describe("Another test for the Tracker class", () => {
   test("Test if the Tracker class return a new Tracker", () => {
     const uuid: string = uuidv4();
-    const matrix: Float32Array = new Float32Array(12)
+    const matrix: Float32Array = new Float32Array(12);
     const t: ITracker = new Tracker("pinball", matrix, uuid);
 
     expect(t.name).toBe("pinball");
