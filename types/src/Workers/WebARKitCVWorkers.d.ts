@@ -13,6 +13,7 @@ export declare class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     private trackableWidth;
     private trackableHeight;
     private _processing;
+    private target;
     constructor(trackables: Map<number, ITrackable>, vwidth: number, vheight: number, twidth: number, theight: number, data: any);
     initialize(): Promise<boolean>;
     /**
@@ -22,4 +23,10 @@ export declare class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
      */
     process(imagedata: ImageData): void;
     protected loadTrackables(): Promise<boolean>;
+    /**
+     * dispatch an event listener if the marker is lost or the matrix of the marker
+     * if found.
+     * @param msg message from the worker.
+     */
+    found(msg: any): void;
 }

@@ -15,11 +15,13 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     trackableWidth;
     trackableHeight;
     _processing = false;
+    target;
     constructor(trackables, vwidth, vheight, twidth, theight, data) {
         super(trackables, vwidth, vheight);
         this.data = data;
         this.trackableWidth = twidth;
         this.trackableHeight = theight;
+        this.target = window || global;
     }
     async initialize() {
         console.log("WebARKitCVOrbWorker initialized");
@@ -42,6 +44,15 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
             vWidth: this.vw,
             vHeight: this.vh,
         });
+        this.worker.onmessage = (ev) => {
+            var msg = ev.data;
+            switch (msg.type) {
+                case "found": {
+                    this.found(msg);
+                    break;
+                }
+            }
+        };
     }
     loadTrackables() {
         this.worker.postMessage({
@@ -51,6 +62,31 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
             trackableHeight: this.trackableHeight,
         });
         return Promise.resolve(true);
+    }
+    /**
+     * dispatch an event listener if the marker is lost or the matrix of the marker
+     * if found.
+     * @param msg message from the worker.
+     */
+    found(msg) {
+        let world;
+        if (!msg) {
+            // commenting out this routine see https://github.com/webarkit/ARnft/pull/184#issuecomment-853400903
+            //if (world) {
+            world = null;
+            /* const nftTrackingLostEvent = new CustomEvent<object>("nftTrackingLost-" + this.uuid + "-" + this.name, {
+                  detail: { name: this.name },
+              });
+              this.target.dispatchEvent(nftTrackingLostEvent);*/
+            //}
+        }
+        else {
+            world = JSON.parse(msg.matrix);
+            const matrixEvent = new CustomEvent("getMatrix", {
+                detail: { matrix: world },
+            });
+            this.target.dispatchEvent(matrixEvent);
+        }
     }
 }
 //export default null as any;

@@ -28,6 +28,9 @@
                 var imgData = imread("rotate");
                 webarkit.track(track.trackers, imgData).then((t) => {
                     console.log(t);
+                    window.addEventListener("getMatrix", function(e) {
+                        console.log(e.detail);}
+                    )
                 })
             }
 
