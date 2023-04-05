@@ -53,7 +53,7 @@ const loadTrackables = async (msg: any) => {
 
   mat.data.set(src.data);
 
-  cv.cvtColor(mat, mat, cv.COLOR_RGBA2GRAY);
+  cv.cvtColor(mat, mat, cv.COLOR_RGBA2GRAY, 0);
 
   let ksize = new cv.Size(BlurSize, BlurSize);
   let anchor = new cv.Point(-1, -1);
@@ -153,7 +153,7 @@ const track = async (msg: any) => {
 
   src.data.set(keyFrameImageData);
 
-  cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
+  cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
 
   let ksize = new cv.Size(BlurSize, BlurSize);
   let anchor = new cv.Point(-1, -1);
@@ -181,7 +181,7 @@ const track = async (msg: any) => {
 
   var matchTotal = knnMatches.size();
 
-  //console.log("matchTotal: ", matchTotal);
+  console.log("matchTotal: ", matchTotal);
 
   for (var i = 0; i < matchTotal; i++) {
     var point = knnMatches.get(i).get(0);

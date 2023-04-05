@@ -23,12 +23,12 @@ ctx.onmessage = (e) => {
     }
 };
 const ValidPointTotal = 15;
-const N = 10;
+const N = 10.0;
 const BlurSize = 4;
 var template_keypoints_vector;
 var template_descriptors;
 var homography_transform;
-var corners = [];
+var corners;
 const loadTrackables = async (msg) => {
     var cv = await opencv;
     console.log(cv);
@@ -37,55 +37,60 @@ const loadTrackables = async (msg) => {
     let refCols = msg.trackableWidth;
     let mat = new cv.Mat(refRows, refCols, cv.CV_8UC4);
     mat.data.set(src.data);
-    cv.cvtColor(mat, mat, cv.COLOR_RGBA2GRAY);
+    cv.cvtColor(mat, mat, cv.COLOR_RGBA2GRAY, 0);
     let ksize = new cv.Size(BlurSize, BlurSize);
     let anchor = new cv.Point(-1, -1);
     //cv.blur(mat, mat, ksize, anchor, cv.BORDER_DEFAULT);
     template_keypoints_vector = new cv.KeyPointVector();
     template_descriptors = new cv.Mat();
     let noArray = new cv.Mat();
-    let orb = new cv.ORB(10000);
+    let orb = new cv.ORB();
     orb.detectAndCompute(mat, noArray, template_keypoints_vector, template_descriptors);
-    corners[0] = new cv.Point(0, 0);
-    corners[1] = new cv.Point(refCols, 0);
-    corners[2] = new cv.Point(refCols, refRows);
-    corners[3] = new cv.Point(0, refRows);
+    var cornersArray = new Float64Array(8);
+    cornersArray[0] = 0;
+    cornersArray[1] = 0;
+    cornersArray[2] = refCols;
+    cornersArray[3] = 0;
+    cornersArray[4] = refCols;
+    cornersArray[5] = refRows;
+    cornersArray[6] = 0;
+    cornersArray[7] = refRows;
+    corners = new cv.matFromArray(2, 2, cv.CV_64FC2, cornersArray);
     mat.delete();
     noArray.delete();
     orb.delete();
 };
 const homographyValid = (H) => {
-    const det = H.at(0, 0) * H.at(1, 1) - H.at(1, 0) * H.at(0, 1);
+    //const double det = H.at<double>(0,0)*H.at<double>(1,1)-H.at<double>(1,0)*H.at<double>(0,1);
+    const det = H.doubleAt(0, 0) * H.doubleAt(1, 1) - H.doubleAt(1, 0) * H.doubleAt(0, 1);
     return 1 / N < Math.abs(det) && Math.abs(det) < N;
 };
-/*const fill_output = (H: any, valid: boolean) => {
-  //vector<Point2f> warped(4);
-  let output = new Float64Array(13);
-  var warped = new cv.Point2fVector();
-  cv.perspectiveTransform(corners, warped, H);
-
-  //output->valid = valid;
-
-  output[0] = H.at(0,0);
-  output[1] = H.at(0,1);
-  output[2] = H.at(0,2);
-  output[3] = H.at(1,0);
-  output[4] = H.at(1,1);
-  output[5] = H.at(1,2);
-  output[6] = H.at(2,0);
-  output[7] = H.at(2,1);
-  output[8] = H.at(2,2);
-
-  output[9]  = warped[0].x;
-  output[10] = warped[0].y;
-  output[11] = warped[1].x;
-  output[12] = warped[1].y;
-  output[13] = warped[2].x;
-  output[14] = warped[2].y;
-  output[15] = warped[3].x;
-  output[16] = warped[3].y;
-  return output;
-}*/
+const fill_output = (cv, H, valid) => {
+    let output = new Float64Array(16);
+    var warped = new cv.Mat(2, 2, cv.CV_64FC2);
+    cv.perspectiveTransform(corners, warped, H);
+    output[0] = H.doubleAt(0, 0);
+    output[1] = H.doubleAt(0, 1);
+    output[2] = H.doubleAt(0, 2);
+    output[3] = H.doubleAt(1, 0);
+    output[4] = H.doubleAt(1, 1);
+    output[5] = H.doubleAt(1, 2);
+    output[6] = H.doubleAt(2, 0);
+    output[7] = H.doubleAt(2, 1);
+    output[8] = H.doubleAt(2, 2);
+    output[9] = warped.doubleAt(0, 0);
+    output[10] = warped.doubleAt(0, 1);
+    output[11] = warped.doubleAt(0, 2);
+    output[12] = warped.doubleAt(0, 3);
+    output[13] = warped.doubleAt(1, 0);
+    output[14] = warped.doubleAt(1, 1);
+    output[15] = warped.doubleAt(1, 2);
+    output[16] = warped.doubleAt(1, 3);
+    console.log(output);
+    // corners.delete();
+    // warped.delete();
+    return output;
+};
 const process = async (msg) => {
     // markerResult = null;
     markerResult = await track(msg);
@@ -103,8 +108,7 @@ const track = async (msg) => {
     const keyFrameImageData = msg.imagedata;
     let src = new cv.Mat(msg.vHeight, msg.vWidth, cv.CV_8UC4);
     src.data.set(keyFrameImageData);
-    console.log(src);
-    cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
+    cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
     let ksize = new cv.Size(BlurSize, BlurSize);
     let anchor = new cv.Point(-1, -1);
     //cv.blur(src, src, ksize, anchor, cv.BORDER_DEFAULT);
@@ -119,7 +123,7 @@ const track = async (msg) => {
     var frame_keypoints = [];
     var template_keypoints = [];
     var matchTotal = knnMatches.size();
-    //console.log("matchTotal: ", matchTotal);
+    console.log("matchTotal: ", matchTotal);
     for (var i = 0; i < matchTotal; i++) {
         var point = knnMatches.get(i).get(0);
         var point2 = knnMatches.get(i).get(1);
@@ -141,16 +145,16 @@ const track = async (msg) => {
     if (template_keypoints.length >= ValidPointTotal) {
         var homography = cv.findHomography(templateMat, frameMat, cv.RANSAC);
         homography_transform = homography.data64F;
+        console.log(homography_transform);
     }
     else {
         homography_transform = null;
     }
     var valid;
-    if (homographyValid(homography)) {
-        //numMatches = framePts.size();
-        //fill_output(homography, valid);
-        //prevIm = currIm.clone();
-    }
+    /*if (homographyValid(homography) == false) {
+      var out = fill_output(cv, homography, valid);
+      console.log(out);
+    }*/
     noArray.delete();
     orb.delete();
     frame_keypoints_vector.delete();
