@@ -36,6 +36,7 @@ export class WebARKitCV {
         this.clear();
         this.webarkit.trackable = new Trackable("", "", "");
         this.webarkit.trackables = new Map();
+        this.webarkit.trackers = new Map();
         this.webarkit.isLoaded = false;
     }
     /**
@@ -77,6 +78,24 @@ export class WebARKitCV {
         return this;
     }
     /**
+     * Initialize the trackables. This method initialize the workers and load the images.
+     * @returns {WebARKitCVBuilder}
+     */
+    loadTrackables() {
+        const trackables = this.webarkit.trackables;
+        trackables.forEach((trackable, index) => {
+            var data = imread(trackable.name);
+            this.trackableWorkers.push(new WebARKitCVOrbWorker(trackables, this.webarkit.width, this.webarkit.height, data.width, data.height, data));
+            this.webarkit.trackers?.set(index, {
+                name: trackable.name,
+                uuid: trackable.uuid,
+                matrix: new Float32Array(),
+            });
+            this.trackableWorkers[index].initialize();
+        });
+        return this;
+    }
+    /**
      * Used internally to set the isLoaded property of the WebARKitCV object.
      * @param {boolean} isLoaded
      * @returns {WebARKitCVBuilder}
@@ -96,18 +115,24 @@ export class WebARKitCV {
         this.clear();
         return webarkit;
     }
-    /**
-     * Initialize the trackables. This method initialize the workers and load the images.
-     * @returns {WebARKitCVBuilder}
-     */
-    loadTrackables() {
-        const trackables = this.webarkit.trackables;
-        trackables.forEach((trackable, index) => {
-            var data = imread(trackable.name);
-            this.trackableWorkers.push(new WebARKitCVOrbWorker(trackables, data.width, data.height, data));
-            this.trackableWorkers[index].initialize();
-        });
-        return this;
+    async track(trackers, imgData) {
+        console.info("Start tracking!");
+        try {
+            let _update = () => {
+                if (true) {
+                    this.trackableWorkers.forEach((trackable) => {
+                        trackable.process(imgData);
+                    });
+                }
+                requestAnimationFrame(_update);
+            };
+            _update();
+            return Promise.resolve(trackers);
+        }
+        catch (e) {
+            console.error(e);
+            return Promise.reject(false);
+        }
     }
     /**
      * Clear the WebARKitCV object. Used internally.

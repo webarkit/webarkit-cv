@@ -1,5 +1,6 @@
 import { WebARKitCVBuilder } from "./interfaces/WebARKitCVBuilder";
 import { WebARKitBase } from "./interfaces/WebARKitCVBuilder";
+import { ITracker } from "./interfaces/Trackers";
 export declare class WebARKitCV implements WebARKitCVBuilder {
     private webarkit;
     private version;
@@ -47,6 +48,11 @@ export declare class WebARKitCV implements WebARKitCVBuilder {
      */
     addTrackable(trackableName: string, trackableUrl: string): WebARKitCVBuilder;
     /**
+     * Initialize the trackables. This method initialize the workers and load the images.
+     * @returns {WebARKitCVBuilder}
+     */
+    loadTrackables(): WebARKitCVBuilder;
+    /**
      * Used internally to set the isLoaded property of the WebARKitCV object.
      * @param {boolean} isLoaded
      * @returns {WebARKitCVBuilder}
@@ -58,11 +64,7 @@ export declare class WebARKitCV implements WebARKitCVBuilder {
      * @returns {WebARKitBase}
      */
     build(): WebARKitBase;
-    /**
-     * Initialize the trackables. This method initialize the workers and load the images.
-     * @returns {WebARKitCVBuilder}
-     */
-    loadTrackables(): WebARKitCVBuilder;
+    track(trackers: Map<number, ITracker>, imgData: ImageData): Promise<Map<number, ITracker>>;
     /**
      * Clear the WebARKitCV object. Used internally.
      */

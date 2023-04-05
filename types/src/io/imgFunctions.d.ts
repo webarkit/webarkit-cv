@@ -3,4 +3,4 @@
  * @param {any} imageSource
  * @returns {ImageData} ImageData
  */
-export declare function imread(imageSource: any): ImageData | undefined;
+export declare function imread(imageSource: any): ImageData;
