@@ -16,6 +16,7 @@
         console.log(WebARKitCV);
 
         const webarkit = new WebARKitCV.WebARKitCV();
+        console.log(webarkit);
 
         webarkit.setWidth(375)
             .setHeight(450)
@@ -24,15 +25,32 @@
 
         const track = webarkit.build();
 
-            if (track.isLoaded) {
-                var imgData = imread("rotate");
-                webarkit.track(track.trackers, imgData).then((t) => {
-                    console.log(t);
-                    window.addEventListener("getMatrix", function(e) {
-                        console.log(e.detail);}
-                    )
-                })
-            }
+        if (track.isLoaded) {
+            var imgData = imread("rotate");
+            webarkit.track(track.trackers, imgData).then((t) => {
+                console.log(t);
+                var imgElem = document.getElementById("face");
+                window.addEventListener("getMatrix", function (e) {
+                    console.log(e.detail);
+                    transformElem(e.detail.matrix, imgElem);
+                }
+                )
+            })
+        }
+        function transformElem(h, elem) {
+            // column major order
+            let transform = [h[0], h[3], 0.0, h[6],
+            h[1], h[4], 0.0, h[7],
+                0.0, 0.0, 1.0, 0.0,
+            h[2], h[5], 0.0, h[8]];
+            transform = "matrix3d(" + transform.join(",") + ")";
+            elem.style["-ms-transform"] = transform;
+            elem.style["-webkit-transform"] = transform;
+            elem.style["-moz-transform"] = transform;
+            elem.style["-o-transform"] = transform;
+            elem.style.transform = transform;
+            elem.style.display = "block";
+        }
 
         function imread(imageSource) {
             var img = null;

@@ -23,6 +23,7 @@ ctx.onmessage = (e) => {
     }
 };
 const ValidPointTotal = 15;
+const N = 10;
 const BlurSize = 4;
 var template_keypoints_vector;
 var template_descriptors;
@@ -30,6 +31,7 @@ var homography_transform;
 var corners = [];
 const loadTrackables = async (msg) => {
     var cv = await opencv;
+    console.log(cv);
     let src = msg.data;
     let refRows = msg.trackableHeight;
     let refCols = msg.trackableWidth;
@@ -52,6 +54,38 @@ const loadTrackables = async (msg) => {
     noArray.delete();
     orb.delete();
 };
+const homographyValid = (H) => {
+    const det = H.at(0, 0) * H.at(1, 1) - H.at(1, 0) * H.at(0, 1);
+    return 1 / N < Math.abs(det) && Math.abs(det) < N;
+};
+/*const fill_output = (H: any, valid: boolean) => {
+  //vector<Point2f> warped(4);
+  let output = new Float64Array(13);
+  var warped = new cv.Point2fVector();
+  cv.perspectiveTransform(corners, warped, H);
+
+  //output->valid = valid;
+
+  output[0] = H.at(0,0);
+  output[1] = H.at(0,1);
+  output[2] = H.at(0,2);
+  output[3] = H.at(1,0);
+  output[4] = H.at(1,1);
+  output[5] = H.at(1,2);
+  output[6] = H.at(2,0);
+  output[7] = H.at(2,1);
+  output[8] = H.at(2,2);
+
+  output[9]  = warped[0].x;
+  output[10] = warped[0].y;
+  output[11] = warped[1].x;
+  output[12] = warped[1].y;
+  output[13] = warped[2].x;
+  output[14] = warped[2].y;
+  output[15] = warped[3].x;
+  output[16] = warped[3].y;
+  return output;
+}*/
 const process = async (msg) => {
     // markerResult = null;
     markerResult = await track(msg);
@@ -110,6 +144,12 @@ const track = async (msg) => {
     }
     else {
         homography_transform = null;
+    }
+    var valid;
+    if (homographyValid(homography)) {
+        //numMatches = framePts.size();
+        //fill_output(homography, valid);
+        //prevIm = currIm.clone();
     }
     noArray.delete();
     orb.delete();
