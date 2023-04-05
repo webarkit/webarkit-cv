@@ -44,7 +44,7 @@ var corners: any;
 const loadTrackables = async (msg: any) => {
   var cv = await opencv;
   console.log(cv);
-  
+
   let src = msg.data;
   let refRows = msg.trackableHeight;
   let refCols = msg.trackableWidth;
@@ -74,7 +74,7 @@ const loadTrackables = async (msg: any) => {
   );
 
   var cornersArray = new Float64Array(8);
- 
+
   cornersArray[0] = 0;
   cornersArray[1] = 0;
   cornersArray[2] = refCols;
@@ -84,8 +84,8 @@ const loadTrackables = async (msg: any) => {
   cornersArray[6] = 0;
   cornersArray[7] = refRows;
 
-  corners =  new cv.matFromArray(2, 2, cv.CV_64FC2, cornersArray);
- 
+  corners = new cv.matFromArray(2, 2, cv.CV_64FC2, cornersArray);
+
   mat.delete();
   noArray.delete();
   orb.delete();
@@ -93,29 +93,29 @@ const loadTrackables = async (msg: any) => {
 
 const homographyValid = (H: any) => {
   //const double det = H.at<double>(0,0)*H.at<double>(1,1)-H.at<double>(1,0)*H.at<double>(0,1);
-  const  det = H.doubleAt(0, 0)*H.doubleAt(1,1) - H.doubleAt(1,0)*H.doubleAt(0,1);
-  
-  return (1/N < Math.abs(det)) && (Math.abs(det) < N);
-}
+  const det =
+    H.doubleAt(0, 0) * H.doubleAt(1, 1) - H.doubleAt(1, 0) * H.doubleAt(0, 1);
+
+  return 1 / N < Math.abs(det) && Math.abs(det) < N;
+};
 
 const fill_output = (cv: any, H: any, valid: boolean) => {
-
   let output = new Float64Array(16);
-  var warped =  new cv.Mat(2, 2, cv.CV_64FC2);
+  var warped = new cv.Mat(2, 2, cv.CV_64FC2);
 
   cv.perspectiveTransform(corners, warped, H);
 
-  output[0] = H.doubleAt(0,0);
-  output[1] = H.doubleAt(0,1);
-  output[2] = H.doubleAt(0,2);
-  output[3] = H.doubleAt(1,0);
-  output[4] = H.doubleAt(1,1);
-  output[5] = H.doubleAt(1,2);
-  output[6] = H.doubleAt(2,0);
-  output[7] = H.doubleAt(2,1);
-  output[8] = H.doubleAt(2,2);
+  output[0] = H.doubleAt(0, 0);
+  output[1] = H.doubleAt(0, 1);
+  output[2] = H.doubleAt(0, 2);
+  output[3] = H.doubleAt(1, 0);
+  output[4] = H.doubleAt(1, 1);
+  output[5] = H.doubleAt(1, 2);
+  output[6] = H.doubleAt(2, 0);
+  output[7] = H.doubleAt(2, 1);
+  output[8] = H.doubleAt(2, 2);
 
-  output[9]  = warped.doubleAt(0, 0);
+  output[9] = warped.doubleAt(0, 0);
   output[10] = warped.doubleAt(0, 1);
   output[11] = warped.doubleAt(0, 2);
   output[12] = warped.doubleAt(0, 3);
@@ -126,11 +126,11 @@ const fill_output = (cv: any, H: any, valid: boolean) => {
 
   console.log(output);
 
- // corners.delete();
- // warped.delete();
+  // corners.delete();
+  // warped.delete();
 
   return output;
-}
+};
 
 const process = async (msg: any) => {
   // markerResult = null;
@@ -215,11 +215,11 @@ const track = async (msg: any) => {
     homography_transform = null;
   }
 
- var valid;
- 
-  if( homographyValid(homography) == true)  {
-      var out = fill_output(cv, homography, valid);
-      console.log(out);   
+  var valid;
+
+  if (homographyValid(homography) == true) {
+    var out = fill_output(cv, homography, valid);
+    console.log(out);
   }
 
   noArray.delete();
