@@ -214,7 +214,7 @@ const track = async (msg: any) => {
 
     valid = homographyValid(homography);
     console.log(valid);
-    
+
     if (homographyValid(homography) === true) {
       var out = fill_output(cv, homography, valid);
       console.log("output from", out);
