@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         node:
-          - 16.x
+          - 20.x
 
     # Packages 'firefox' and 'chromium' are pre-installed.
     #

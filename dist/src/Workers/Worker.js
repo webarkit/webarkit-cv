@@ -44,7 +44,7 @@ const loadTrackables = async (msg) => {
     template_keypoints_vector = new cv.KeyPointVector();
     template_descriptors = new cv.Mat();
     let noArray = new cv.Mat();
-    let orb = new cv.ORB();
+    let orb = new cv.ORB(10000);
     orb.detectAndCompute(mat, noArray, template_keypoints_vector, template_descriptors);
     var cornersArray = new Float64Array(8);
     cornersArray[0] = 0;
@@ -145,16 +145,15 @@ const track = async (msg) => {
     if (template_keypoints.length >= ValidPointTotal) {
         var homography = cv.findHomography(templateMat, frameMat, cv.RANSAC);
         homography_transform = homography.data64F;
-        console.log(homography_transform);
     }
     else {
         homography_transform = null;
     }
     var valid;
-    /*if (homographyValid(homography) == false) {
-      var out = fill_output(cv, homography, valid);
-      console.log(out);
-    }*/
+    if (homographyValid(homography) == true) {
+        var out = fill_output(cv, homography, valid);
+        console.log(out);
+    }
     noArray.delete();
     orb.delete();
     frame_keypoints_vector.delete();
