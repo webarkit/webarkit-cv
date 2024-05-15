@@ -9,12 +9,13 @@
 
 A set of tools to build a custom and light opencv lib to be used in WebAR projects. This is a WIP, but at this moment opencv_js.js can be imported as a **ES6** module.
 The main goal of this project is to develop a WebAR library that can be used to build a WebAR application, based on the OpenCV library.
+We do not reccomend to use this library in production, but if you want to try it, you can clone the project and test the examples. The API and the structure of the project can change in the future, so be aware of this.
 
 ## Typescript
 WebARKIitCV is developed in Typescript language; Type definitions are in `types` folder.
 
 ## OpenCV and emsdk
-We are using OpenCV version 4.6.0 and emsdk 2.0.10
+We are using OpenCV version 4.7.0 and emsdk 3.1.26
 
 ### Tools
 

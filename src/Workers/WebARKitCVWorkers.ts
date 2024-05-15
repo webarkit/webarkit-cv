@@ -15,7 +15,7 @@ export abstract class AbstractWebARKitCVWorker {
     this.vh = height;
   }
   abstract initialize(): Promise<boolean>;
-  abstract process(): void;
+  abstract process(imagedata: ImageData): void;
 }
 
 export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
@@ -23,16 +23,21 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
   private data: any;
   private trackableWidth: number;
   private trackableHeight: number;
+  private _processing: boolean = false;
+  private target: EventTarget;
   constructor(
     trackables: Map<number, ITrackable>,
-    width: number,
-    height: number,
+    vwidth: number,
+    vheight: number,
+    twidth: number,
+    theight: number,
     data: any
   ) {
-    super(trackables, width, height);
+    super(trackables, vwidth, vheight);
     this.data = data;
-    this.trackableWidth = width;
-    this.trackableHeight = height;
+    this.trackableWidth = twidth;
+    this.trackableHeight = theight;
+    this.target = window || global;
   }
 
   public async initialize(): Promise<boolean> {
@@ -41,8 +46,32 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     return await this.loadTrackables();
   }
 
-  public process(): void {
-    console.log("WebARKitCVWorker process");
+  /**
+   * This is the function that will pass the video stream to the worker.
+   * @param imageData the image data from the video stream.
+   * @returns void
+   */
+  public process(imagedata: ImageData): void {
+    if (this._processing) {
+      return;
+    }
+    this._processing = true;
+
+    this.worker.postMessage({
+      type: "process",
+      imagedata: imagedata.data.buffer,
+      vWidth: this.vw,
+      vHeight: this.vh,
+    });
+    this.worker.onmessage = (ev: any) => {
+      var msg = ev.data;
+      switch (msg.type) {
+        case "found": {
+          this.found(msg);
+          break;
+        }
+      }
+    };
   }
 
   protected loadTrackables(): Promise<boolean> {
@@ -53,6 +82,31 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
       trackableHeight: this.trackableHeight,
     });
     return Promise.resolve(true);
+  }
+
+  /**
+   * dispatch an event listener if the marker is lost or the matrix of the marker
+   * if found.
+   * @param msg message from the worker.
+   */
+  public found(msg: any) {
+    let world: Float64Array;
+    if (!msg) {
+      // commenting out this routine see https://github.com/webarkit/ARnft/pull/184#issuecomment-853400903
+      //if (world) {
+      world = null;
+      /* const nftTrackingLostEvent = new CustomEvent<object>("nftTrackingLost-" + this.uuid + "-" + this.name, {
+            detail: { name: this.name },
+        });
+        this.target.dispatchEvent(nftTrackingLostEvent);*/
+      //}
+    } else {
+      world = JSON.parse(msg.matrix);
+      const matrixEvent = new CustomEvent<object>("getMatrix", {
+        detail: { matrix: world },
+      });
+      this.target.dispatchEvent(matrixEvent);
+    }
   }
 }
 

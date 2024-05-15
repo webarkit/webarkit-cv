@@ -1,6 +1,7 @@
 import { WebARKitCVBuilder } from "./interfaces/WebARKitCVBuilder";
 import { WebARKitBase } from "./interfaces/WebARKitCVBuilder";
 import { ITrackable, Trackable } from "./interfaces/Trackables";
+import { ITracker } from "./interfaces/Trackers";
 import { WebARKitCVOrbWorker } from "./Workers/WebARKitCVWorkers";
 import { imread } from "./io/imgFunctions";
 import { v4 as uuidv4 } from "uuid";
@@ -38,6 +39,7 @@ export class WebARKitCV implements WebARKitCVBuilder {
     this.clear();
     this.webarkit.trackable = new Trackable("", "", "");
     this.webarkit.trackables = new Map<number, ITrackable>();
+    this.webarkit.trackers = new Map<number, ITracker>();
     this.webarkit.isLoaded = false;
   }
 
@@ -88,6 +90,34 @@ export class WebARKitCV implements WebARKitCVBuilder {
   }
 
   /**
+   * Initialize the trackables. This method initialize the workers and load the images.
+   * @returns {WebARKitCVBuilder}
+   */
+  public loadTrackables(): WebARKitCVBuilder {
+    const trackables = this.webarkit.trackables;
+    trackables!.forEach((trackable, index: number) => {
+      var data = imread(trackable.name);
+      this.trackableWorkers.push(
+        new WebARKitCVOrbWorker(
+          trackables!,
+          this.webarkit.width,
+          this.webarkit.height,
+          data!.width,
+          data!.height,
+          data
+        )
+      );
+      this.webarkit.trackers?.set(index, {
+        name: trackable.name,
+        uuid: trackable.uuid,
+        matrix: new Float32Array(),
+      });
+      this.trackableWorkers![index].initialize();
+    });
+    return this;
+  }
+
+  /**
    * Used internally to set the isLoaded property of the WebARKitCV object.
    * @param {boolean} isLoaded
    * @returns {WebARKitCVBuilder}
@@ -109,20 +139,28 @@ export class WebARKitCV implements WebARKitCVBuilder {
     return webarkit;
   }
 
-  /**
-   * Initialize the trackables. This method initialize the workers and load the images.
-   * @returns {WebARKitCVBuilder}
-   */
-  public loadTrackables(): WebARKitCVBuilder {
-    const trackables = this.webarkit.trackables;
-    trackables!.forEach((trackable, index: number) => {
-      var data = imread(trackable.name);
-      this.trackableWorkers.push(
-        new WebARKitCVOrbWorker(trackables!, data!.width, data!.height, data)
-      );
-      this.trackableWorkers![index].initialize();
-    });
-    return this;
+  public async track(
+    trackers: Map<number, ITracker>,
+    imgData: ImageData
+  ): Promise<Map<number, ITracker>> {
+    console.info("Start tracking!");
+    try {
+      let _update = () => {
+        if (true) {
+          this.trackableWorkers.forEach((trackable) => {
+            trackable.process(imgData);
+          });
+        }
+        requestAnimationFrame(_update);
+      };
+
+      _update();
+
+      return Promise.resolve(trackers);
+    } catch (e) {
+      console.error(e);
+      return Promise.reject(false);
+    }
   }
 
   /**

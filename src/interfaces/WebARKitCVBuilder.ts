@@ -1,4 +1,5 @@
 import { ITrackable } from "./Trackables";
+import { ITracker } from "./Trackers";
 
 export class WebARKitBase {
   /**
@@ -8,6 +9,7 @@ export class WebARKitBase {
    * @param {number} height
    * @param {ITrackable} trackable
    * @param {Map<number, ITrackable>} trackables
+   * @param {Map<number, ITracker>} trackers
    * @param {boolean} isLoaded
    */
   constructor(
@@ -15,6 +17,7 @@ export class WebARKitBase {
     public height?: number,
     public trackable?: ITrackable,
     public trackables?: Map<number, ITrackable>,
+    public trackers?: Map<number, ITracker>,
     public isLoaded?: boolean
   ) {}
 }
