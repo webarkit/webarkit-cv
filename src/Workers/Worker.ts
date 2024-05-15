@@ -211,6 +211,10 @@ const track = async (msg: any) => {
   if (template_keypoints.length >= ValidPointTotal) {
     var homography = cv.findHomography(templateMat, frameMat, cv.RANSAC);
     var valid;
+
+    valid = homographyValid(homography);
+    console.log(valid);
+    
     if (homographyValid(homography) === true) {
       var out = fill_output(cv, homography, valid);
       console.log("output from", out);
