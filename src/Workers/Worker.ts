@@ -213,7 +213,7 @@ const track = async (msg: any) => {
     var valid;
     if (homographyValid(homography) === true) {
       var out = fill_output(cv, homography, valid);
-      console.log('output from', out);
+      console.log("output from", out);
     }
     homography_transform = homography.data64F;
   } else {
