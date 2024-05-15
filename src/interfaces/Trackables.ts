@@ -20,5 +20,9 @@ export interface ITrackable {
  * @property {string} uuid - The uuid of the trackable.
  */
 export class Trackable implements ITrackable {
-  constructor(public url: string, public name: string, public uuid: string) {}
+  constructor(
+    public url: string,
+    public name: string,
+    public uuid: string,
+  ) {}
 }

@@ -22,6 +22,6 @@ export class Tracker implements ITracker {
   constructor(
     public name: string,
     public matrix: Float32Array,
-    public uuid: string
+    public uuid: string,
   ) {}
 }

@@ -73,7 +73,7 @@ export class WebARKitCV implements WebARKitCVBuilder {
    */
   public addTrackable(
     trackableName: string,
-    trackableUrl: string
+    trackableUrl: string,
   ): WebARKitCVBuilder {
     if (typeof trackableName === "string" && typeof trackableUrl === "string") {
       this.webarkit!.trackable!.name = trackableName;
@@ -81,7 +81,7 @@ export class WebARKitCV implements WebARKitCVBuilder {
       this.webarkit!.trackable!.uuid = uuidv4();
       this.webarkit!.trackables?.set(
         this.trackableCount++,
-        this.webarkit!.trackable!
+        this.webarkit!.trackable!,
       );
     } else {
       throw new Error("Trackable name and url must be strings");
@@ -104,8 +104,8 @@ export class WebARKitCV implements WebARKitCVBuilder {
           this.webarkit.height,
           data!.width,
           data!.height,
-          data
-        )
+          data,
+        ),
       );
       this.webarkit.trackers?.set(index, {
         name: trackable.name,
@@ -141,7 +141,7 @@ export class WebARKitCV implements WebARKitCVBuilder {
 
   public async track(
     trackers: Map<number, ITracker>,
-    imgData: ImageData
+    imgData: ImageData,
   ): Promise<Map<number, ITracker>> {
     console.info("Start tracking!");
     try {

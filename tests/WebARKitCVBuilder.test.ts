@@ -31,7 +31,7 @@ class WebARKitCV implements WebARKitCVBuilder {
 
   public addTrackable(
     trackableName: string,
-    trackableUrl: string
+    trackableUrl: string,
   ): WebARKitCVBuilder {
     if (typeof trackableName === "string" && typeof trackableUrl === "string") {
       this.webarkit!.trackable!.name = trackableName;
@@ -39,7 +39,7 @@ class WebARKitCV implements WebARKitCVBuilder {
       this.webarkit!.trackable!.uuid = uuidv4();
       this.webarkit!.trackables?.set(
         this.trackableCount++,
-        this.webarkit!.trackable!
+        this.webarkit!.trackable!,
       );
     } else {
       throw new Error("Trackable name and url must be strings");

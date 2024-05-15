@@ -70,7 +70,7 @@ const loadTrackables = async (msg: any) => {
     mat,
     noArray,
     template_keypoints_vector,
-    template_descriptors
+    template_descriptors,
   );
 
   var cornersArray = new Float64Array(8);

@@ -130,13 +130,13 @@ export class CameraViewRenderer implements ICameraViewRenderer {
         this.ox,
         this.oy,
         this.w,
-        this.h
+        this.h,
       );
       const imageData = this.context_process.getImageData(
         0,
         0,
         this.pw,
-        this.ph
+        this.ph,
       );
       if (this.imageDataCache == null) {
         this.imageDataCache = imageData.data;
@@ -163,7 +163,7 @@ export class CameraViewRenderer implements ICameraViewRenderer {
         this.ox,
         this.oy,
         this.w,
-        this.h
+        this.h,
       );
       console.log(this.context_process);
 
@@ -171,7 +171,7 @@ export class CameraViewRenderer implements ICameraViewRenderer {
         0,
         0,
         this.pw,
-        this.ph
+        this.ph,
       );
       if (this.imageDataCache == null) {
         this.imageDataCache = imageData.data;
@@ -251,7 +251,7 @@ export class CameraViewRenderer implements ICameraViewRenderer {
       }
     } else {
       return Promise.reject(
-        "Sorry, Your device does not support this experience."
+        "Sorry, Your device does not support this experience.",
       );
     }
   }

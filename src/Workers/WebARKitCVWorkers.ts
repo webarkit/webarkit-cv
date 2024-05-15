@@ -8,7 +8,7 @@ export abstract class AbstractWebARKitCVWorker {
   constructor(
     trackables: Map<number, ITrackable>,
     width: number,
-    height: number
+    height: number,
   ) {
     this.trackables = trackables;
     this.vw = width;
@@ -31,7 +31,7 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     vheight: number,
     twidth: number,
     theight: number,
-    data: any
+    data: any,
   ) {
     super(trackables, vwidth, vheight);
     this.data = data;

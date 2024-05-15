@@ -18,7 +18,7 @@ export class WebARKitBase {
     public trackable?: ITrackable,
     public trackables?: Map<number, ITrackable>,
     public trackers?: Map<number, ITracker>,
-    public isLoaded?: boolean
+    public isLoaded?: boolean,
   ) {}
 }
 
