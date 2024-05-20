@@ -3,7 +3,7 @@ const ctx: Worker = self as any;
 
 var next: any = null;
 
-var _msg;
+var _msg: any;
 let ocv: any = null;
 let markerResult: any = null;
 
@@ -19,10 +19,6 @@ ctx.onmessage = (e: MessageEvent<any>) => {
       _msg = msg;
       process(msg);
     }
-    case "loaded": {
-      ocv = msg.CV;
-
-    }
   }
 };
 
@@ -32,9 +28,10 @@ const loadTrackables = (msg: any) => {
     ocv = core;
     console.log(core);
     console.log(ocv)
+   
+    ocv.loadTrackables(msg);
     var EVENT = new CustomEvent("loaded", { detail: { CV: ocv } });
     ctx.dispatchEvent(EVENT);
-    ocv.loadTrackables(msg);
   }
 
   const onError = function (error: any) {
@@ -42,12 +39,13 @@ const loadTrackables = (msg: any) => {
   };
 
   WebARKitCoreCV.initCV().then(onLoad).catch(onError);
-  console.log(ocv);
 };
 
 ctx.addEventListener("loaded", (e: any) => {
   console.log(e)
   ocv = e.detail.CV;
+  //process(_msg);
+  ocv.track(_msg);
 });
 
 const process = (msg: any) => {
