@@ -117,6 +117,8 @@ export class WebARKitCoreCV {
         var knnMatches = new this.cv.DMatchVectorVector();
 
         var matcher = new this.cv.BFMatcher();
+        console.log("template_descriptors", this.template_descriptors);
+        
 
         matcher.knnMatch(frame_descriptors, this.template_descriptors, knnMatches, 2);
 
