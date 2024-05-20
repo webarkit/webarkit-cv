@@ -45,7 +45,8 @@ ctx.addEventListener("loaded", (e: any) => {
   console.log(e)
   ocv = e.detail.CV;
   //process(_msg);
-  ocv.track(_msg);
+  markerResult= ocv.track(_msg);
+  ctx.postMessage(markerResult);
 });
 
 const process = (msg: any) => {
@@ -57,6 +58,8 @@ const process = (msg: any) => {
 
     markerResult = ocv.track(msg);
   }
+  console.log(markerResult);
+  
 
   if (markerResult != null) {
     ctx.postMessage(markerResult);
