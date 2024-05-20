@@ -1,12 +1,18 @@
-import cv from "../../build/opencv_js";
+//import cv from "../../build/opencv_js";
+import { WebARKitCoreCV } from "../core/WebARKitCoreCV";
 const ctx = self;
 const initCV = async () => {
     return new Promise((resolve, reject) => {
+        console.log(cv);
         resolve(cv());
     });
 };
 var opencv;
-opencv = initCV();
+var cv;
+//opencv =  initCV();
+opencv = new WebARKitCoreCV();
+//cv = await opencv.initCV();
+console.log(cv);
 var next;
 let markerResult = null;
 ctx.onmessage = (e) => {
@@ -29,24 +35,41 @@ var template_keypoints_vector;
 var template_descriptors;
 var homography_transform;
 var corners;
-const loadTrackables = async (msg) => {
-    var cv = await opencv;
-    console.log(cv);
+const loadTrackables = (msg) => {
+    //var cv = await opencv;
+    //console.log(cv);
+    /*console.log(cv);
+  
     let src = msg.data;
     let refRows = msg.trackableHeight;
     let refCols = msg.trackableWidth;
+  
     let mat = new cv.Mat(refRows, refCols, cv.CV_8UC4);
+  
     mat.data.set(src.data);
+  
     cv.cvtColor(mat, mat, cv.COLOR_RGBA2GRAY, 0);
+  
     let ksize = new cv.Size(BlurSize, BlurSize);
     let anchor = new cv.Point(-1, -1);
     //cv.blur(mat, mat, ksize, anchor, cv.BORDER_DEFAULT);
     template_keypoints_vector = new cv.KeyPointVector();
+  
     template_descriptors = new cv.Mat();
+  
     let noArray = new cv.Mat();
+  
     let orb = new cv.ORB(10000);
-    orb.detectAndCompute(mat, noArray, template_keypoints_vector, template_descriptors);
+  
+    orb.detectAndCompute(
+      mat,
+      noArray,
+      template_keypoints_vector,
+      template_descriptors,
+    );
+  
     var cornersArray = new Float64Array(8);
+  
     cornersArray[0] = 0;
     cornersArray[1] = 0;
     cornersArray[2] = refCols;
@@ -55,10 +78,17 @@ const loadTrackables = async (msg) => {
     cornersArray[5] = refRows;
     cornersArray[6] = 0;
     cornersArray[7] = refRows;
+  
     corners = new cv.matFromArray(2, 2, cv.CV_64FC2, cornersArray);
+  
     mat.delete();
     noArray.delete();
-    orb.delete();
+    orb.delete();*/
+    //await opencv.loadTrackables(msg);
+    WebARKitCoreCV.initCV().then((core) => {
+        console.log(core);
+        core.loadTrackables(msg);
+    });
 };
 const homographyValid = (H) => {
     //const double det = H.at<double>(0,0)*H.at<double>(1,1)-H.at<double>(1,0)*H.at<double>(0,1);
@@ -171,4 +201,18 @@ const track = async (msg) => {
     result = { type: "found", matrix: JSON.stringify(homography_transform) };
     return result;
 };
+async function convertToGray(img) {
+    var cv = await opencv;
+    const imgGray = new cv.Mat();
+    cv.cvtColor(img, imgGray, cv.COLOR_BGR2GRAY);
+    return imgGray;
+}
+async function dot(a, b) {
+    var cv = await opencv;
+    const res = new cv.Mat;
+    const zeros = cv.Mat.zeros(a.cols, b.rows, cv.CV_64F);
+    cv.gemm(a, b, 1, zeros, 0, res);
+    zeros.delete();
+    return res;
+}
 //# sourceMappingURL=Worker.js.map
