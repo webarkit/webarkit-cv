@@ -25,9 +25,6 @@ ctx.onmessage = (e: MessageEvent<any>) => {
 const loadTrackables = (msg: any) => {
   const onLoad = (core: any) => {
     ocv = core;
-    console.log(core);
-    console.log(ocv);
-
     ocv.loadTrackables(msg);
     var EVENT = new CustomEvent("loaded", { detail: { CV: ocv } });
     ctx.dispatchEvent(EVENT);
@@ -41,7 +38,6 @@ const loadTrackables = (msg: any) => {
 };
 
 ctx.addEventListener("loaded", (e: any) => {
-  console.log(e);
   ocv = e.detail.CV;
   //process(_msg);
   markerResult = ocv.track(_msg);
