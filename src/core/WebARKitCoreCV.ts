@@ -12,6 +12,8 @@ export class WebARKitCoreCV {
   private ValidPointTotal = 15;
   private N = 10.0;
   private homography_transform: any;
+  private orb: any;
+  private bfMatcher: any;
 
   constructor() {
     this.listeners = {};
@@ -253,6 +255,137 @@ export class WebARKitCoreCV {
 
     return output;
   };
+
+  initTracker() {
+    this.orb = new this.cv.ORB(1000)                                   //E poi creeremo immediatamente l'ORB
+    this.bfMatcher = new this.cv.BFMatcher(this.cv.NORM_HAMMING, true)    //E allo stesso tempo un matcher
+  }
+
+  matchKeypoints (queryImageData: any, trainImageData: any, threshold = 30){
+
+    const queryPoints = []
+    const trainPoints = []
+
+    const matches = new this.cv.DMatchVector()
+
+    if(trainImageData.keypoints.size() > 5)
+      this.bfMatcher.match(queryImageData.descriptors, trainImageData.descriptors, matches)
+
+    const good_matches = []
+    for (let i = 0; i < matches.size(); i++) {
+      if (matches.get(i).distance < threshold)
+        good_matches.push(matches.get(i));
+    }
+
+    for(let i = 0; i < good_matches.length; i++) {
+      queryPoints.push([
+        queryImageData.keypoints.get(good_matches[i].queryIdx).pt.x,
+        queryImageData.keypoints.get(good_matches[i].queryIdx).pt.y,
+        0
+      ])
+
+      trainPoints.push([
+        trainImageData.keypoints.get(good_matches[i].trainIdx).pt.x,
+        trainImageData.keypoints.get(good_matches[i].trainIdx).pt.y
+      ])
+    }
+
+    const queryPointsMat = this.cv.matFromArray(queryPoints.length, 1, this.cv.CV_32FC3, queryPoints.flat());
+    const trainPointsMat = this.cv.matFromArray(trainPoints.length, 1, this.cv.CV_32FC2, trainPoints.flat());
+
+    matches.delete()
+    return { queryPointsMat, trainPointsMat }
+  }
+
+  convertToGray (img: any){
+    const imgGray = new this.cv.Mat()
+    this.cv.cvtColor(img, imgGray, this.cv.COLOR_BGR2GRAY)
+
+    return imgGray
+  }
+
+  dot(a: any, b: any){
+    const res = new this.cv.Mat
+    const zeros = this.cv.Mat.zeros(a.cols, b.rows, this.cv.CV_64F)
+    this.cv.gemm(a, b, 1, zeros, 0, res)
+    zeros.delete()
+
+    return res
+  }
+
+  getProjectionMatrix(rvec: any, tvec: any, mtx: any){
+    const rotationMatrix = new this.cv.Mat()
+    this.cv.Rodrigues(rvec, rotationMatrix)
+
+    const extrinsicMatrix = new this.cv.Mat(3, 4, this.cv.CV_64F)
+
+    for(let i = 0; i < 3; i++){
+      for(let j = 0; j < 3; j++){
+        extrinsicMatrix.doublePtr(i, j)[0] = rotationMatrix.doubleAt(i, j)
+      }
+      extrinsicMatrix.doublePtr(i, 3)[0] = tvec.doubleAt(i, 0)
+    }
+
+
+    const projectionMatrix = this.dot(mtx, extrinsicMatrix)
+
+    extrinsicMatrix.delete()
+    rotationMatrix.delete()
+
+    return projectionMatrix
+  }
+
+  getImageKeypoints(image: any){
+
+    const keypoints = new this.cv.KeyPointVector()             //Ключевые точки
+    const none = new this.cv.Mat()
+    const descriptors = new this.cv.Mat()                              //Дескрипторы точек (т.е. некое уникальное значение)
+
+    this.orb.detectAndCompute(image, none, keypoints, descriptors)
+
+    none.delete()
+
+    const dispose = () => {
+      keypoints.delete()
+      descriptors.delete()
+    }
+
+    return { image, keypoints, descriptors, delete: dispose }
+  }
+
+  imageDataFromMat(mat: any): ImageData {
+    // converts the mat type to cv.CV_8U
+    const img = new this.cv.Mat()
+    const depth = mat.type() % 8
+    const scale =
+        depth <= this.cv.CV_8S ? 1.0 : depth <= this.cv.CV_32S ? 1.0 / 256.0 : 255.0
+    const shift = depth === this.cv.CV_8S || depth === this.cv.CV_16S ? 128.0 : 0.0
+    mat.convertTo(img, this.cv.CV_8U, scale, shift)
+
+    // converts the img type to cv.CV_8UC4
+    switch (img.type()) {
+      case this.cv.CV_8UC1:
+        this.cv.cvtColor(img, img, this.cv.COLOR_GRAY2RGBA)
+        break
+      case this.cv.CV_8UC3:
+        this.cv.cvtColor(img, img, this.cv.COLOR_RGB2RGBA)
+        break
+      case this.cv.CV_8UC4:
+        break
+      default:
+        throw new Error(
+            'Bad number of channels (Source image must have 1, 3 or 4 channels)'
+        )
+    }
+    const clampedArray = new ImageData(
+        new Uint8ClampedArray(img.data),
+        img.cols,
+        img.rows
+    )
+    img.delete()
+    mat.delete()
+    return clampedArray
+  }
 
   addEventListener(name: string, callback: object): void {
     if (!this.converter().listeners[name]) {
