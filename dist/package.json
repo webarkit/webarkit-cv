@@ -1,6 +1,6 @@
 {
     "name": "@webarkit/webarkit-cv",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "A nice project based on OpenCV to develop WebAR applications.",
     "main": "dist/webarkitCV.js",
     "types": "types/src/index.d.ts",
