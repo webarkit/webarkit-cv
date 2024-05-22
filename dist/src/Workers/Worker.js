@@ -21,8 +21,6 @@ ctx.onmessage = (e) => {
 const loadTrackables = (msg) => {
     const onLoad = (core) => {
         ocv = core;
-        console.log(core);
-        console.log(ocv);
         ocv.loadTrackables(msg);
         var EVENT = new CustomEvent("loaded", { detail: { CV: ocv } });
         ctx.dispatchEvent(EVENT);
@@ -33,7 +31,6 @@ const loadTrackables = (msg) => {
     WebARKitCoreCV.initCV().then(onLoad).catch(onError);
 };
 ctx.addEventListener("loaded", (e) => {
-    console.log(e);
     ocv = e.detail.CV;
     //process(_msg);
     markerResult = ocv.track(_msg);

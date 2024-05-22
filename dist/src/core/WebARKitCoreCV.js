@@ -1,3 +1,4 @@
+// @ts-ignore
 import _cv from "../../build/opencv_js";
 export class WebARKitCoreCV {
     cv;
@@ -63,7 +64,6 @@ export class WebARKitCoreCV {
     }
     track(msg) {
         var result;
-        //var cv = await opencv;
         const keyFrameImageData = msg.imagedata;
         let src = new this.cv.Mat(msg.vHeight, msg.vWidth, this.cv.CV_8UC4);
         src.data.set(keyFrameImageData);
@@ -106,7 +106,6 @@ export class WebARKitCoreCV {
             var homography = this.cv.findHomography(templateMat, frameMat, this.cv.RANSAC);
             var valid;
             valid = this.homographyValid(homography);
-            console.log(valid);
             if (this.homographyValid(homography) === true) {
                 var out = this.fill_output(homography, valid);
                 console.log("output from", out);
@@ -135,7 +134,6 @@ export class WebARKitCoreCV {
         return result;
     }
     homographyValid(H) {
-        //const double det = H.at<double>(0,0)*H.at<double>(1,1)-H.at<double>(1,0)*H.at<double>(0,1);
         const det = H.doubleAt(0, 0) * H.doubleAt(1, 1) - H.doubleAt(1, 0) * H.doubleAt(0, 1);
         return 1 / this.N < Math.abs(det) && Math.abs(det) < this.N;
     }
