@@ -223,7 +223,7 @@ export class WebARKitCoreCV {
   }
 
   fill_output = (H: any, valid: boolean) => {
-    let output = new Float64Array(16);
+    let output = new Float64Array(17);
     var warped = new this.cv.Mat(2, 2, this.cv.CV_64FC2);
     this.cv.perspectiveTransform(this.corners, warped, H);
 
