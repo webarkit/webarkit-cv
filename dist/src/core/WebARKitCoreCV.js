@@ -65,9 +65,12 @@ export class WebARKitCoreCV {
     track(msg) {
         var result;
         const keyFrameImageData = msg.imagedata;
+        console.log(keyFrameImageData);
         let src = new this.cv.Mat(msg.vHeight, msg.vWidth, this.cv.CV_8UC4);
+        let gray = new this.cv.Mat(msg.vHeight, msg.vWidth, this.cv.CV_8UC1);
         src.data.set(keyFrameImageData);
-        this.cv.cvtColor(src, src, this.cv.COLOR_RGBA2GRAY, 0);
+        this.cv.cvtColor(src, gray, this.cv.COLOR_RGBA2GRAY, 0);
+        console.log(gray);
         let ksize = new this.cv.Size(this.BlurSize, this.BlurSize);
         let anchor = new this.cv.Point(-1, -1);
         //cv.blur(src, src, ksize, anchor, cv.BORDER_DEFAULT);
@@ -75,7 +78,7 @@ export class WebARKitCoreCV {
         var frame_descriptors = new this.cv.Mat();
         var orb = new this.cv.ORB(10000);
         var noArray = new this.cv.Mat();
-        orb.detectAndCompute(src, noArray, frame_keypoints_vector, frame_descriptors);
+        orb.detectAndCompute(gray, noArray, frame_keypoints_vector, frame_descriptors);
         var knnMatches = new this.cv.DMatchVectorVector();
         var matcher = new this.cv.BFMatcher();
         console.log("template_descriptors", this.template_descriptors);
@@ -89,28 +92,41 @@ export class WebARKitCoreCV {
             var point2 = knnMatches.get(i).get(1);
             if (point.distance < 0.7 * point2.distance) {
                 var frame_point = frame_keypoints_vector.get(point.queryIdx).pt;
-                frame_keypoints.push(frame_point);
+                console.log(frame_point.x);
+                //frame_keypoints.push(frame_point);
+                frame_keypoints.push(frame_point.x);
+                frame_keypoints.push(frame_point.y);
                 var template_point = this.template_keypoints_vector.get(point.trainIdx).pt;
-                template_keypoints.push(template_point);
+                //template_keypoints.push(template_point);
+                template_keypoints.push(template_point.x);
+                template_keypoints.push(template_point.y);
             }
         }
+        console.log(template_keypoints);
         var frameMat = new this.cv.Mat(frame_keypoints.length, 1, this.cv.CV_32FC2);
         var templateMat = new this.cv.Mat(template_keypoints.length, 1, this.cv.CV_32FC2);
-        for (let i = 0; i < template_keypoints.length; i++) {
-            frameMat.data32F[i * 2] = frame_keypoints[i].x;
-            frameMat.data32F[i * 2 + 1] = frame_keypoints[i].y;
-            templateMat.data32F[i * 2] = template_keypoints[i].x;
-            templateMat.data32F[i * 2 + 1] = template_keypoints[i].y;
-        }
+        frameMat.data32F.set(frame_keypoints);
+        templateMat.data32F.set(template_keypoints);
+        /*for (let i = 0; i < template_keypoints.length; i++) {
+          frameMat.data32F[i * 2] = frame_keypoints[i].x;
+          frameMat.data32F[i * 2 + 1] = frame_keypoints[i].y;
+    
+          templateMat.data32F[i * 2] = template_keypoints[i].x;
+          templateMat.data32F[i * 2 + 1] = template_keypoints[i].y;
+        }*/
         if (template_keypoints.length >= this.ValidPointTotal) {
-            var homography = this.cv.findHomography(templateMat, frameMat, this.cv.RANSAC);
+            var homography = this.cv.findHomography(frameMat, templateMat, this.cv.RANSAC);
+            console.log("homograpy: ", homography);
             var valid;
             valid = this.homographyValid(homography);
-            if (this.homographyValid(homography) === true) {
+            console.log(valid);
+            if (this.homographyValid(homography) == true) {
+                console.log('true');
                 var out = this.fill_output(homography, valid);
                 console.log("output from", out);
             }
-            this.homography_transform = homography.data64F;
+            //this.homography_transform = homography.data64F;
+            this.homography_transform = out.slice(0, 9);
         }
         else {
             this.homography_transform = null;
@@ -134,7 +150,9 @@ export class WebARKitCoreCV {
         return result;
     }
     homographyValid(H) {
+        console.log(H.floatAt(0, 0));
         const det = H.doubleAt(0, 0) * H.doubleAt(1, 1) - H.doubleAt(1, 0) * H.doubleAt(0, 1);
+        //H.floatAt(0, 0) * H.floatAt(1, 1) - H.floatAt(1, 0) * H.floatAt(0, 1);
         return 1 / this.N < Math.abs(det) && Math.abs(det) < this.N;
     }
     fill_output = (H, valid) => {
