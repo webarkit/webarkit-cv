@@ -5,6 +5,7 @@ export declare class WebARKitCoreCV {
     private template_keypoints_vector;
     private template_descriptors;
     private corners;
+    private corners_out;
     private listeners;
     private ValidPointTotal;
     private N;
@@ -16,6 +17,7 @@ export declare class WebARKitCoreCV {
     track(msg: any): {
         type: string;
         matrix: string;
+        corners: string;
     };
     homographyValid(H: any): boolean;
     fill_output: (H: any, valid: boolean) => Float64Array;

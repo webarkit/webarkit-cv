@@ -7,6 +7,7 @@ export class WebARKitCoreCV {
     template_keypoints_vector;
     template_descriptors;
     corners;
+    corners_out;
     listeners;
     ValidPointTotal = 15;
     N = 10.0;
@@ -38,8 +39,9 @@ export class WebARKitCoreCV {
         let refRows = msg.trackableHeight;
         let refCols = msg.trackableWidth;
         let mat = new this.cv.Mat(refRows, refCols, this.cv.CV_8UC4);
+        let grayImage = new this.cv.Mat(refRows, refCols, this.cv.CV_8UC1);
         mat.data.set(src.data);
-        this.cv.cvtColor(mat, mat, this.cv.COLOR_RGBA2GRAY, 0);
+        this.cv.cvtColor(mat, grayImage, this.cv.COLOR_RGBA2GRAY, 0);
         let ksize = new this.cv.Size(this.BlurSize, this.BlurSize);
         let anchor = new this.cv.Point(-1, -1);
         //cv.blur(mat, mat, ksize, anchor, cv.BORDER_DEFAULT);
@@ -47,7 +49,7 @@ export class WebARKitCoreCV {
         this.template_descriptors = new this.cv.Mat();
         let noArray = new this.cv.Mat();
         let orb = new this.cv.ORB(10000);
-        orb.detectAndCompute(mat, noArray, this.template_keypoints_vector, this.template_descriptors);
+        orb.detectAndCompute(grayImage, noArray, this.template_keypoints_vector, this.template_descriptors);
         var cornersArray = new Float64Array(8);
         cornersArray[0] = 0;
         cornersArray[1] = 0;
@@ -92,7 +94,6 @@ export class WebARKitCoreCV {
             var point2 = knnMatches.get(i).get(1);
             if (point.distance < 0.7 * point2.distance) {
                 var frame_point = frame_keypoints_vector.get(point.queryIdx).pt;
-                console.log(frame_point.x);
                 //frame_keypoints.push(frame_point);
                 frame_keypoints.push(frame_point.x);
                 frame_keypoints.push(frame_point.y);
@@ -102,7 +103,6 @@ export class WebARKitCoreCV {
                 template_keypoints.push(template_point.y);
             }
         }
-        console.log(template_keypoints);
         var frameMat = new this.cv.Mat(frame_keypoints.length, 1, this.cv.CV_32FC2);
         var templateMat = new this.cv.Mat(template_keypoints.length, 1, this.cv.CV_32FC2);
         frameMat.data32F.set(frame_keypoints);
@@ -121,15 +121,16 @@ export class WebARKitCoreCV {
             valid = this.homographyValid(homography);
             console.log(valid);
             if (this.homographyValid(homography) == true) {
-                console.log('true');
                 var out = this.fill_output(homography, valid);
                 console.log("output from", out);
             }
             //this.homography_transform = homography.data64F;
             this.homography_transform = out.slice(0, 9);
+            this.corners_out = out.slice(10, 18);
         }
         else {
             this.homography_transform = null;
+            this.corners_out = null;
         }
         noArray.delete();
         orb.delete();
@@ -146,18 +147,18 @@ export class WebARKitCoreCV {
         result = {
             type: "found",
             matrix: JSON.stringify(this.homography_transform),
+            corners: JSON.stringify(this.corners_out),
         };
         return result;
     }
     homographyValid(H) {
-        console.log(H.floatAt(0, 0));
         const det = H.doubleAt(0, 0) * H.doubleAt(1, 1) - H.doubleAt(1, 0) * H.doubleAt(0, 1);
         //H.floatAt(0, 0) * H.floatAt(1, 1) - H.floatAt(1, 0) * H.floatAt(0, 1);
         return 1 / this.N < Math.abs(det) && Math.abs(det) < this.N;
     }
     fill_output = (H, valid) => {
         let output = new Float64Array(17);
-        var warped = new this.cv.Mat(2, 2, this.cv.CV_64FC2);
+        let warped = new this.cv.Mat(2, 2, this.cv.CV_64FC2);
         this.cv.perspectiveTransform(this.corners, warped, H);
         output[0] = H.doubleAt(0, 0);
         output[1] = H.doubleAt(0, 1);
@@ -177,8 +178,8 @@ export class WebARKitCoreCV {
         output[15] = warped.doubleAt(1, 2);
         output[16] = warped.doubleAt(1, 3);
         console.log(output);
-        // corners.delete();
-        // warped.delete();
+        H.delete();
+        warped.delete();
         return output;
     };
     addEventListener(name, callback) {
