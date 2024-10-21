@@ -70,6 +70,7 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
      */
     found(msg) {
         let world;
+        let corners;
         if (!msg) {
             // commenting out this routine see https://github.com/webarkit/ARnft/pull/184#issuecomment-853400903
             //if (world) {
@@ -82,8 +83,9 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
         }
         else {
             world = JSON.parse(msg.matrix);
+            corners = JSON.parse(msg.corners);
             const matrixEvent = new CustomEvent("getMatrix", {
-                detail: { matrix: world },
+                detail: { matrix: world, corners: corners },
             });
             this.target.dispatchEvent(matrixEvent);
         }

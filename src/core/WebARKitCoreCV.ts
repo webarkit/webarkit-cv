@@ -8,6 +8,7 @@ export class WebARKitCoreCV {
   private template_keypoints_vector: any;
   private template_descriptors: any;
   private corners: any;
+  private corners_out: any;
   private listeners: object;
   private ValidPointTotal = 15;
   private N = 10.0;
@@ -49,10 +50,11 @@ export class WebARKitCoreCV {
     let refCols = msg.trackableWidth;
 
     let mat = new this.cv.Mat(refRows, refCols, this.cv.CV_8UC4);
+    let grayImage = new this.cv.Mat(refRows, refCols, this.cv.CV_8UC1);
 
     mat.data.set(src.data);
 
-    this.cv.cvtColor(mat, mat, this.cv.COLOR_RGBA2GRAY, 0);
+    this.cv.cvtColor(mat, grayImage, this.cv.COLOR_RGBA2GRAY, 0);
 
     let ksize = new this.cv.Size(this.BlurSize, this.BlurSize);
     let anchor = new this.cv.Point(-1, -1);
@@ -66,7 +68,7 @@ export class WebARKitCoreCV {
     let orb = new this.cv.ORB(10000);
 
     orb.detectAndCompute(
-      mat,
+      grayImage,
       noArray,
       this.template_keypoints_vector,
       this.template_descriptors,
@@ -153,7 +155,7 @@ export class WebARKitCoreCV {
 
       if (point.distance < 0.7 * point2.distance) {
         var frame_point = frame_keypoints_vector.get(point.queryIdx).pt;
-        console.log(frame_point.x)
+
         //frame_keypoints.push(frame_point);
         frame_keypoints.push(frame_point.x);
         frame_keypoints.push(frame_point.y);
@@ -167,7 +169,6 @@ export class WebARKitCoreCV {
         template_keypoints.push(template_point.y);
       }
     }
-    console.log(template_keypoints)
 
     var frameMat = new this.cv.Mat(frame_keypoints.length, 1, this.cv.CV_32FC2);
     var templateMat = new this.cv.Mat(
@@ -200,14 +201,15 @@ export class WebARKitCoreCV {
       console.log(valid)
 
       if (this.homographyValid(homography) == true) {
-          console.log('true')
           var out = this.fill_output(homography, valid);
           console.log("output from", out);
       }
       //this.homography_transform = homography.data64F;
-      this.homography_transform = out.slice(0,9)
+      this.homography_transform = out.slice(0,9);
+      this.corners_out = out.slice(10, 18);
     } else {
       this.homography_transform = null;
+      this.corners_out = null;
     }
 
     noArray.delete();
@@ -227,22 +229,21 @@ export class WebARKitCoreCV {
     result = {
       type: "found",
       matrix: JSON.stringify(this.homography_transform),
+      corners: JSON.stringify(this.corners_out),
     };
     return result;
   }
 
   homographyValid(H: any) {
-    console.log(H.floatAt(0,0))
     const det =
       H.doubleAt(0, 0) * H.doubleAt(1, 1) - H.doubleAt(1, 0) * H.doubleAt(0, 1);
       //H.floatAt(0, 0) * H.floatAt(1, 1) - H.floatAt(1, 0) * H.floatAt(0, 1);
-
     return 1 / this.N < Math.abs(det) && Math.abs(det) < this.N;
   }
 
   fill_output = (H: any, valid: boolean) => {
     let output = new Float64Array(17);
-    var warped = new this.cv.Mat(2, 2, this.cv.CV_64FC2);
+    let warped = new this.cv.Mat(2, 2, this.cv.CV_64FC2);
     this.cv.perspectiveTransform(this.corners, warped, H);
 
     output[0] = H.doubleAt(0, 0);
@@ -266,8 +267,8 @@ export class WebARKitCoreCV {
 
     console.log(output);
 
-    // corners.delete();
-    // warped.delete();
+    H.delete();
+    warped.delete();
 
     return output;
   };
