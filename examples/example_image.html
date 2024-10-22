@@ -17,6 +17,10 @@
 
         const webarkit = new WebARKitCV.WebARKitCV();
         console.log(webarkit);
+        var overlayCanvas;
+        var oWidth = 375;
+        var oHeight = 375;
+        createOverlayCanvas();
 
         webarkit.setWidth(375)
             .setHeight(450)
@@ -33,10 +37,49 @@
                 window.addEventListener("getMatrix", function (e) {
                     console.log(e.detail);
                     transformElem(e.detail.matrix, imgElem);
+                    drawCorners(e.detail.corners);
                 }
                 )
             })
         }
+        function setVideoStyle(elem) {
+            elem.style.position = "absolute";
+            elem.style.top = 0;
+            elem.style.left = 0;
+        }
+        function createOverlayCanvas() {
+            overlayCanvas = document.createElement("canvas");
+            setVideoStyle(overlayCanvas);
+            overlayCanvas.id = "overlay";
+            overlayCanvas.width = oWidth;
+            overlayCanvas.height = oHeight;
+            overlayCanvas.style.zIndex = 1;
+            document.body.appendChild(overlayCanvas);
+        }
+
+        function clearOverlayCtx() {
+            const overlayCtx = overlayCanvas.getContext("2d");
+            overlayCtx.clearRect(0, 0, oWidth, oHeight);
+        }
+
+        function drawCorners(corners) {
+            const overlayCtx = overlayCanvas.getContext("2d");
+            clearOverlayCtx();
+
+            overlayCtx.beginPath();
+            overlayCtx.strokeStyle = "blue";
+            overlayCtx.lineWidth = 3;
+
+            // [x1,y1,x2,y2,x3,y3,x4,y4]
+            overlayCtx.moveTo(corners[0], corners[1]);
+            overlayCtx.lineTo(corners[2], corners[3]);
+            overlayCtx.lineTo(corners[4], corners[5]);
+            overlayCtx.lineTo(corners[6], corners[7]);
+            overlayCtx.lineTo(corners[0], corners[1]);
+
+            overlayCtx.stroke();
+        }
+
         function transformElem(h, elem) {
             // column major order
             let transform = [h[0], h[3], 0.0, h[6],
