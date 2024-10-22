@@ -54,7 +54,7 @@ export class WebARKitCoreCV {
 
     mat.data.set(src.data);
 
-    this.cv.cvtColor(mat, grayImage, this.cv.COLOR_RGBA2GRAY, 0);
+    this.cv.cvtColor(mat, grayImage, this.cv.COLOR_RGBA2GRAY);
 
     let ksize = new this.cv.Size(this.BlurSize, this.BlurSize);
     let anchor = new this.cv.Point(-1, -1);
@@ -100,14 +100,13 @@ export class WebARKitCoreCV {
   track(msg: any) {
     var result;
     const keyFrameImageData = msg.imagedata;
-    console.log(keyFrameImageData)
 
     let src = new this.cv.Mat(msg.vHeight, msg.vWidth, this.cv.CV_8UC4);
     let gray = new this.cv.Mat(msg.vHeight, msg.vWidth, this.cv.CV_8UC1);
 
     src.data.set(keyFrameImageData);
 
-    this.cv.cvtColor(src, gray, this.cv.COLOR_RGBA2GRAY, 0);
+    this.cv.cvtColor(src, gray, this.cv.COLOR_RGBA2GRAY);
     console.log(gray)
 
     let ksize = new this.cv.Size(this.BlurSize, this.BlurSize);
@@ -131,6 +130,8 @@ export class WebARKitCoreCV {
 
     var knnMatches = new this.cv.DMatchVectorVector();
 
+    let good_matches = new this.cv.DMatchVector();
+
     var matcher = new this.cv.BFMatcher();
     console.log("template_descriptors", this.template_descriptors);
 
@@ -140,8 +141,8 @@ export class WebARKitCoreCV {
       knnMatches,
       2,
     );
-
-    var frame_keypoints = [];
+    var knnDistance_option = 0.7; // distance ratio threshold
+    /*var frame_keypoints = [];
 
     var template_keypoints = [];
 
@@ -168,17 +169,72 @@ export class WebARKitCoreCV {
         template_keypoints.push(template_point.x);
         template_keypoints.push(template_point.y);
       }
-    }
+    }*/
 
-    var frameMat = new this.cv.Mat(frame_keypoints.length, 1, this.cv.CV_32FC2);
+    let counter = 0;
+        for (let i = 0; i < knnMatches.size(); ++i) {
+            let match = knnMatches.get(i);
+            let dMatch1 = match.get(0);
+            let dMatch2 = match.get(1);
+
+            //console.log("[", i, "] ", "dMatch1: ", dMatch1, "dMatch2: ", dMatch2);
+            if (dMatch1.distance <= dMatch2.distance * knnDistance_option) {
+                //console.log("***Good Match***", "dMatch1.distance: ", dMatch1.distance, "was less than or = to: ", "dMatch2.distance * parseFloat(knnDistance_option)", dMatch2.distance * parseFloat(knnDistance_option), "dMatch2.distance: ", dMatch2.distance, "knnDistance", knnDistance_option);
+                good_matches.push_back(dMatch1);
+                counter++;
+            }
+        }
+
+        console.log("keeping ", counter, " points in good_matches vector out of ", knnMatches.size(), " contained in this match vector:", knnMatches);
+        console.log("here are first 5 matches");
+        
+        for (let t = 0; t < knnMatches.size(); ++t) {
+            console.log("[" + t + "]", "matches: ", knnMatches.get(t));
+            if (t === 5) { break; }
+        }
+
+        console.log("here are first 5 good_matches");
+        for (let r = 0; r < good_matches.size(); ++r) {
+            console.log("[" + r + "]", "good_matches: ", good_matches.get(r));
+            if (r === 5) { break; }
+        }
+
+    /*var frameMat = new this.cv.Mat(frame_keypoints.length/2, 1, this.cv.CV_32FC2);
     var templateMat = new this.cv.Mat(
-      template_keypoints.length,
+      template_keypoints.length/2,
       1,
       this.cv.CV_32FC2,
     );
 
     frameMat.data32F.set(frame_keypoints)
-    templateMat.data32F.set(template_keypoints)
+    templateMat.data32F.set(template_keypoints)*/
+
+    let points1 = [];
+    let points2 = [];
+    /*for (let i = 0; i < good_matches.size(); i++) {
+        points1.push(keypoints1.get(good_matches.get(i).queryIdx).pt);
+        points2.push(keypoints2.get(good_matches.get(i).trainIdx).pt);
+    }*/
+
+    for (let i = 0; i < good_matches.size(); i++) {
+        points1.push(frame_keypoints_vector.get(good_matches.get(i).queryIdx).pt.x);
+        points1.push(frame_keypoints_vector.get(good_matches.get(i).queryIdx).pt.y);
+        points2.push(this.template_keypoints_vector.get(good_matches.get(i).trainIdx).pt.x);
+        points2.push(this.template_keypoints_vector.get(good_matches.get(i).trainIdx).pt.y);
+    }
+
+    console.log("points1:", points1, "points2:", points2);
+
+    //59            Find homography
+    //60            h = findHomography( points1, points2, RANSAC );
+    //let mat1 = cv.matFromArray(points1.length, 2, cv.CV_32F, points1);
+    //let mat2 = cv.matFromArray(points2.length, 2, cv.CV_32F, points2); //32FC2
+    
+    var mat1 = new this.cv.Mat(points1.length/2,1, this.cv.CV_32FC2);
+    mat1.data32F.set(points1);
+    var mat2 = new this.cv.Mat(points2.length/2,1, this.cv.CV_32FC2);
+    mat2.data32F.set(points2);
+    console.log("mat1: ", mat1, "mat2: ", mat2);
 
     /*for (let i = 0; i < template_keypoints.length; i++) {
       frameMat.data32F[i * 2] = frame_keypoints[i].x;
@@ -188,25 +244,27 @@ export class WebARKitCoreCV {
       templateMat.data32F[i * 2 + 1] = template_keypoints[i].y;
     }*/
 
-    if (template_keypoints.length >= this.ValidPointTotal) {
-      var homography = this.cv.findHomography(
+    //if (template_keypoints.length >= this.ValidPointTotal) {
+    if (points2.length >= this.ValidPointTotal) {
+      /*var homography = this.cv.findHomography(
           frameMat,
           templateMat,
           this.cv.RANSAC,
-      );
+      );*/
+      let homography = this.cv.findHomography(mat1, mat2, this.cv.RANSAC);
       console.log("homograpy: ",homography);
       var valid;
 
       valid = this.homographyValid(homography);
       console.log(valid)
 
-      if (this.homographyValid(homography) == true) {
+      //if (this.homographyValid(homography) == true) {
           var out = this.fill_output(homography, valid);
           console.log("output from", out);
-      }
+      //}
       //this.homography_transform = homography.data64F;
       this.homography_transform = out.slice(0,9);
-      this.corners_out = out.slice(10, 18);
+      this.corners_out = out.slice(9, 18);
     } else {
       this.homography_transform = null;
       this.corners_out = null;
@@ -218,11 +276,13 @@ export class WebARKitCoreCV {
     frame_descriptors.delete();
     knnMatches.delete();
     matcher.delete();
-    templateMat.delete();
-    frameMat.delete();
+    //templateMat.delete();
+    //frameMat.delete();
+    mat1.delete();
+    mat2.delete();
     src.delete();
-    frame_keypoints = <any>(<unknown>null);
-    template_keypoints = <any>(<unknown>null);
+    //frame_keypoints = <any>(<unknown>null);
+    //template_keypoints = <any>(<unknown>null);
 
     console.log("Homography from orb detector: ", this.homography_transform);
 

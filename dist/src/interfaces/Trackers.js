@@ -6,13 +6,13 @@
  * @property {string} uuid - The uuid of the tracker.
  */
 export class Tracker {
-  name;
-  matrix;
-  uuid;
-  constructor(name, matrix, uuid) {
-    this.name = name;
-    this.matrix = matrix;
-    this.uuid = uuid;
-  }
+    name;
+    matrix;
+    uuid;
+    constructor(name, matrix, uuid) {
+        this.name = name;
+        this.matrix = matrix;
+        this.uuid = uuid;
+    }
 }
 //# sourceMappingURL=Trackers.js.map
