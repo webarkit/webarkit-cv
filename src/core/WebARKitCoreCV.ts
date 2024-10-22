@@ -107,7 +107,7 @@ export class WebARKitCoreCV {
     src.data.set(keyFrameImageData);
 
     this.cv.cvtColor(src, gray, this.cv.COLOR_RGBA2GRAY);
-    console.log(gray)
+    console.log(gray);
 
     let ksize = new this.cv.Size(this.BlurSize, this.BlurSize);
     let anchor = new this.cv.Point(-1, -1);
@@ -172,32 +172,43 @@ export class WebARKitCoreCV {
     }*/
 
     let counter = 0;
-        for (let i = 0; i < knnMatches.size(); ++i) {
-            let match = knnMatches.get(i);
-            let dMatch1 = match.get(0);
-            let dMatch2 = match.get(1);
+    for (let i = 0; i < knnMatches.size(); ++i) {
+      let match = knnMatches.get(i);
+      let dMatch1 = match.get(0);
+      let dMatch2 = match.get(1);
 
-            //console.log("[", i, "] ", "dMatch1: ", dMatch1, "dMatch2: ", dMatch2);
-            if (dMatch1.distance <= dMatch2.distance * knnDistance_option) {
-                //console.log("***Good Match***", "dMatch1.distance: ", dMatch1.distance, "was less than or = to: ", "dMatch2.distance * parseFloat(knnDistance_option)", dMatch2.distance * parseFloat(knnDistance_option), "dMatch2.distance: ", dMatch2.distance, "knnDistance", knnDistance_option);
-                good_matches.push_back(dMatch1);
-                counter++;
-            }
-        }
+      //console.log("[", i, "] ", "dMatch1: ", dMatch1, "dMatch2: ", dMatch2);
+      if (dMatch1.distance <= dMatch2.distance * knnDistance_option) {
+        //console.log("***Good Match***", "dMatch1.distance: ", dMatch1.distance, "was less than or = to: ", "dMatch2.distance * parseFloat(knnDistance_option)", dMatch2.distance * parseFloat(knnDistance_option), "dMatch2.distance: ", dMatch2.distance, "knnDistance", knnDistance_option);
+        good_matches.push_back(dMatch1);
+        counter++;
+      }
+    }
 
-        console.log("keeping ", counter, " points in good_matches vector out of ", knnMatches.size(), " contained in this match vector:", knnMatches);
-        console.log("here are first 5 matches");
-        
-        for (let t = 0; t < knnMatches.size(); ++t) {
-            console.log("[" + t + "]", "matches: ", knnMatches.get(t));
-            if (t === 5) { break; }
-        }
+    console.log(
+      "keeping ",
+      counter,
+      " points in good_matches vector out of ",
+      knnMatches.size(),
+      " contained in this match vector:",
+      knnMatches,
+    );
+    console.log("here are first 5 matches");
 
-        console.log("here are first 5 good_matches");
-        for (let r = 0; r < good_matches.size(); ++r) {
-            console.log("[" + r + "]", "good_matches: ", good_matches.get(r));
-            if (r === 5) { break; }
-        }
+    for (let t = 0; t < knnMatches.size(); ++t) {
+      console.log("[" + t + "]", "matches: ", knnMatches.get(t));
+      if (t === 5) {
+        break;
+      }
+    }
+
+    console.log("here are first 5 good_matches");
+    for (let r = 0; r < good_matches.size(); ++r) {
+      console.log("[" + r + "]", "good_matches: ", good_matches.get(r));
+      if (r === 5) {
+        break;
+      }
+    }
 
     /*var frameMat = new this.cv.Mat(frame_keypoints.length/2, 1, this.cv.CV_32FC2);
     var templateMat = new this.cv.Mat(
@@ -217,10 +228,18 @@ export class WebARKitCoreCV {
     }*/
 
     for (let i = 0; i < good_matches.size(); i++) {
-        points1.push(frame_keypoints_vector.get(good_matches.get(i).queryIdx).pt.x);
-        points1.push(frame_keypoints_vector.get(good_matches.get(i).queryIdx).pt.y);
-        points2.push(this.template_keypoints_vector.get(good_matches.get(i).trainIdx).pt.x);
-        points2.push(this.template_keypoints_vector.get(good_matches.get(i).trainIdx).pt.y);
+      points1.push(
+        frame_keypoints_vector.get(good_matches.get(i).queryIdx).pt.x,
+      );
+      points1.push(
+        frame_keypoints_vector.get(good_matches.get(i).queryIdx).pt.y,
+      );
+      points2.push(
+        this.template_keypoints_vector.get(good_matches.get(i).trainIdx).pt.x,
+      );
+      points2.push(
+        this.template_keypoints_vector.get(good_matches.get(i).trainIdx).pt.y,
+      );
     }
 
     console.log("points1:", points1, "points2:", points2);
@@ -229,10 +248,10 @@ export class WebARKitCoreCV {
     //60            h = findHomography( points1, points2, RANSAC );
     //let mat1 = cv.matFromArray(points1.length, 2, cv.CV_32F, points1);
     //let mat2 = cv.matFromArray(points2.length, 2, cv.CV_32F, points2); //32FC2
-    
-    var mat1 = new this.cv.Mat(points1.length/2,1, this.cv.CV_32FC2);
+
+    var mat1 = new this.cv.Mat(points1.length / 2, 1, this.cv.CV_32FC2);
     mat1.data32F.set(points1);
-    var mat2 = new this.cv.Mat(points2.length/2,1, this.cv.CV_32FC2);
+    var mat2 = new this.cv.Mat(points2.length / 2, 1, this.cv.CV_32FC2);
     mat2.data32F.set(points2);
     console.log("mat1: ", mat1, "mat2: ", mat2);
 
@@ -252,18 +271,18 @@ export class WebARKitCoreCV {
           this.cv.RANSAC,
       );*/
       let homography = this.cv.findHomography(mat1, mat2, this.cv.RANSAC);
-      console.log("homograpy: ",homography);
+      console.log("homograpy: ", homography);
       var valid;
 
       valid = this.homographyValid(homography);
-      console.log(valid)
+      console.log(valid);
 
       //if (this.homographyValid(homography) == true) {
-          var out = this.fill_output(homography, valid);
-          console.log("output from", out);
+      var out = this.fill_output(homography, valid);
+      console.log("output from", out);
       //}
       //this.homography_transform = homography.data64F;
-      this.homography_transform = out.slice(0,9);
+      this.homography_transform = out.slice(0, 9);
       this.corners_out = out.slice(9, 18);
     } else {
       this.homography_transform = null;
@@ -297,7 +316,7 @@ export class WebARKitCoreCV {
   homographyValid(H: any) {
     const det =
       H.doubleAt(0, 0) * H.doubleAt(1, 1) - H.doubleAt(1, 0) * H.doubleAt(0, 1);
-      //H.floatAt(0, 0) * H.floatAt(1, 1) - H.floatAt(1, 0) * H.floatAt(0, 1);
+    //H.floatAt(0, 0) * H.floatAt(1, 1) - H.floatAt(1, 0) * H.floatAt(0, 1);
     return 1 / this.N < Math.abs(det) && Math.abs(det) < this.N;
   }
 

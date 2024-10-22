@@ -103,7 +103,7 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
       //}
     } else {
       world = JSON.parse(msg.matrix);
-      corners= JSON.parse(msg.corners);
+      corners = JSON.parse(msg.corners);
       const matrixEvent = new CustomEvent<object>("getMatrix", {
         detail: { matrix: world, corners: corners },
       });
