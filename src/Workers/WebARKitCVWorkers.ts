@@ -65,7 +65,7 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     });
     this.worker.onmessage = (ev: any) => {
       var msg = ev.data;
-      console.log(msg)
+      console.log(msg);
       switch (msg.type) {
         case "found": {
           this.found(msg);
