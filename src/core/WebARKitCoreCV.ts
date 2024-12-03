@@ -249,10 +249,10 @@ export class WebARKitCoreCV {
     //let mat1 = cv.matFromArray(points1.length, 2, cv.CV_32F, points1);
     //let mat2 = cv.matFromArray(points2.length, 2, cv.CV_32F, points2); //32FC2
 
-    var mat1 = new this.cv.Mat(points1.length / 2, 1, this.cv.CV_32FC2);
-    mat1.data32F.set(points1);
-    var mat2 = new this.cv.Mat(points2.length / 2, 1, this.cv.CV_32FC2);
-    mat2.data32F.set(points2);
+    var mat1 = new this.cv.matFromArray(points1.length, 1, this.cv.CV_32FC3, points1.flat());
+    //mat1.data32F.set(points1);
+    var mat2 = new this.cv.matFromArray(points2.length, 1, this.cv.CV_32FC2, points2.flat());
+    //mat2.data32F.set(points2);
     console.log("mat1: ", mat1, "mat2: ", mat2);
 
     /*for (let i = 0; i < template_keypoints.length; i++) {
