@@ -36,8 +36,9 @@
                 var imgElem = document.getElementById("face");
                 window.addEventListener("getMatrix", function (e) {
                     console.log(e.detail);
-                    transformElem(e.detail.matrix, imgElem);
-                    drawCorners(e.detail.corners);
+                    //transformElem(e.detail.matrix, imgElem);
+                    //drawCorners(e.detail.corners);
+                    drawOverlay(e.detail.finalImage);
                 }
                 )
             })
@@ -78,6 +79,11 @@
             overlayCtx.lineTo(corners[0], corners[1]);
 
             overlayCtx.stroke();
+        }
+
+        function drawOverlay(imageData) {
+            const overlayCtx = overlayCanvas.getContext("2d");
+            overlayCtx.putImageData(imageData, 0, 0);
         }
 
         function transformElem(h, elem) {

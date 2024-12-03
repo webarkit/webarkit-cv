@@ -65,6 +65,7 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     });
     this.worker.onmessage = (ev: any) => {
       var msg = ev.data;
+      console.log(msg)
       switch (msg.type) {
         case "found": {
           this.found(msg);
@@ -92,6 +93,7 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
   public found(msg: any) {
     let world: Float64Array;
     let corners: any;
+    let finalImage: ImageData;
     if (!msg) {
       // commenting out this routine see https://github.com/webarkit/ARnft/pull/184#issuecomment-853400903
       //if (world) {
@@ -104,8 +106,9 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     } else {
       world = JSON.parse(msg.matrix);
       corners = JSON.parse(msg.corners);
+      finalImage = msg.finalImage;
       const matrixEvent = new CustomEvent<object>("getMatrix", {
-        detail: { matrix: world, corners: corners },
+        detail: { matrix: world, corners: corners, finalImage: finalImage },
       });
       this.target.dispatchEvent(matrixEvent);
     }

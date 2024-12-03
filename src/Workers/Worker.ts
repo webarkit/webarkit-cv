@@ -1,4 +1,4 @@
-import { WebARKitCoreCV } from "../core/WebARKitCoreCV";
+import { WebARKitCoreCV } from "../core/WebARKitCoreCV2";
 const ctx: Worker = self as any;
 
 var next: any = null;
