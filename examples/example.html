@@ -18,6 +18,7 @@
         var video = document.getElementById('video');
 
         const cameraView = new WebARKitCV.CameraViewRenderer(video);
+        console.log(cameraView)
 
         var videoSettingData = {
             width: { min: 640, max: 800 },
@@ -26,22 +27,51 @@
             targetFrameRate: 60
         }
 
-        const webarkit = new WebARKitCV.WebARKitCV(video);
+        var oWidth = 320;
+        var oHeight = 240;
 
-        webarkit.setWidth(640)
-            .setHeight(480)
+        const webarkit = new WebARKitCV.WebARKitCV(video);
+        var overlayCanvas;
+        createOverlayCanvas();
+
+        webarkit.setWidth(320)
+            .setHeight(240)
             .addTrackable("pinball", "./pinball.jpg")
             .loadTrackables()
 
         const track = webarkit.build();
 
         cameraView.initialize(videoSettingData).then(() => {
+            console.log(cameraView.getImage())
             if (track.isLoaded) {
-                webarkit.track(track.trackers, cameraView.image).then((t) => {
-                    console.log(t);
+                webarkit.track(track.trackers, cameraView.getImage()).then((t) => {
+                    console.log('tracker: ', t);
+                    window.addEventListener("getMatrix", function (e) {
+                        console.log(e.detail);
+                        drawOverlay(e.detail.finalImage);
+                    })
                 })
             }
         })
+
+        function createOverlayCanvas() {
+            overlayCanvas = document.createElement("canvas");
+            setVideoStyle(overlayCanvas);
+            overlayCanvas.id = "overlay";
+            overlayCanvas.width = oWidth;
+            overlayCanvas.height = oHeight;
+            overlayCanvas.style.zIndex = 1;
+            document.body.appendChild(overlayCanvas);
+        }
+        function drawOverlay(imageData) {
+            const overlayCtx = overlayCanvas.getContext("2d");
+            overlayCtx.putImageData(imageData, 0, 0);
+        }
+        function setVideoStyle(elem) {
+            elem.style.position = "absolute";
+            elem.style.top = 0;
+            elem.style.left = 0;
+        }
 
     </script>
 

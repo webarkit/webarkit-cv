@@ -56,10 +56,11 @@ export class WebARKitCoreCV {
         return { id: this.memoryData.length - 1 };
     }
     track(msg) {
+        console.log("Tracking...", msg);
         const imageData = new ImageData(new Uint8ClampedArray(msg.imagedata), msg.vWidth, msg.vHeight);
         return this.estimateCameraPosition({ id: 0, imageData: imageData });
     }
-    estimateCameraPosition({ id, imageData }) {
+    estimateCameraPosition({ id, imageData, }) {
         const img = this.cv.matFromImageData(imageData);
         const imgGray = this.convertToGray(img);
         img.delete();
@@ -109,12 +110,12 @@ export class WebARKitCoreCV {
                 this.memoryData[id].trainPointsMat = this.filter(trainPointsMat, filterArr);
                 this.draw(finalImage, projectionMatrix);
                 this.drawPoints(finalImage, trainPointsMat);
-                console.log('Tracking  !!!!');
+                console.log("Tracking  !!!!");
                 const result = {
                     type: "found",
                     matrix: JSON.stringify(projectionMatrix.data64F),
                     corners: JSON.stringify([]),
-                    finalImage: this.imageDataFromMat(finalImage)
+                    finalImage: this.imageDataFromMat(finalImage),
                 };
                 projectionMatrix.delete();
                 return result;
@@ -155,7 +156,7 @@ export class WebARKitCoreCV {
     }
     // Filtering out Mat
     filter(mat, arr) {
-        const rows = arr.reduce((sum, flag) => flag ? sum + 1 : sum, 0);
+        const rows = arr.reduce((sum, flag) => (flag ? sum + 1 : sum), 0);
         const newMat = new this.cv.Mat(rows, mat.cols, mat.type());
         let j = 0;
         for (let i = 0; i < mat.rows; i++) {
@@ -165,12 +166,7 @@ export class WebARKitCoreCV {
         return newMat;
     }
     draw(finalImage, projectionMatrix) {
-        const _axis = [
-            0, 0, 0, 1,
-            30, 0, 0, 1,
-            0, 30, 0, 1,
-            0, 0, -30, 1
-        ];
+        const _axis = [0, 0, 0, 1, 30, 0, 0, 1, 0, 30, 0, 1, 0, 0, -30, 1];
         const axisT = this.cv.matFromArray(4, 4, this.cv.CV_64F, _axis);
         const axis = axisT.t();
         console.log(projectionMatrix);
@@ -180,7 +176,7 @@ export class WebARKitCoreCV {
         for (let i = 0; i < 4; i++) {
             pointsArr.push({
                 x: points.doubleAt(i, 0) / points.doubleAt(i, 2),
-                y: points.doubleAt(i, 1) / points.doubleAt(i, 2)
+                y: points.doubleAt(i, 1) / points.doubleAt(i, 2),
             });
         }
         this.cv.line(finalImage, pointsArr[0], pointsArr[1], [255, 0, 0, 255], 2);
@@ -197,13 +193,9 @@ export class WebARKitCoreCV {
         }
     }
     getCameraMatrix(rows, cols) {
-        const f = Math.hypot(cols, rows) / 2 / (Math.tan(this.angle / 2 * Math.PI / 180));
+        const f = Math.hypot(cols, rows) / 2 / Math.tan(((this.angle / 2) * Math.PI) / 180);
         //console.log(f)
-        const _mtx = [
-            f, 0, cols / 2,
-            0, f, rows / 2,
-            0, 0, 1
-        ];
+        const _mtx = [f, 0, cols / 2, 0, f, rows / 2, 0, 0, 1];
         const mtx = this.cv.matFromArray(3, 3, this.cv.CV_64F, _mtx);
         return mtx;
     }
@@ -228,11 +220,11 @@ export class WebARKitCoreCV {
             queryPoints.push([
                 queryImageData.keypoints.get(good_matches[i].queryIdx).pt.x,
                 queryImageData.keypoints.get(good_matches[i].queryIdx).pt.y,
-                0
+                0,
             ]);
             trainPoints.push([
                 trainImageData.keypoints.get(good_matches[i].trainIdx).pt.x,
-                trainImageData.keypoints.get(good_matches[i].trainIdx).pt.y
+                trainImageData.keypoints.get(good_matches[i].trainIdx).pt.y,
             ]);
         }
         const queryPointsMat = this.cv.matFromArray(queryPoints.length, 1, this.cv.CV_32FC3, queryPoints.flat());
@@ -246,7 +238,7 @@ export class WebARKitCoreCV {
         return imgGray;
     }
     dot(a, b) {
-        const res = new this.cv.Mat;
+        const res = new this.cv.Mat();
         const zeros = this.cv.Mat.zeros(a.cols, b.rows, this.cv.CV_64F);
         this.cv.gemm(a, b, 1, zeros, 0, res);
         zeros.delete();
@@ -283,7 +275,11 @@ export class WebARKitCoreCV {
         // converts the mat type to this.cv.CV_8U
         const img = new this.cv.Mat();
         const depth = mat.type() % 8;
-        const scale = depth <= this.cv.CV_8S ? 1.0 : depth <= this.cv.CV_32S ? 1.0 / 256.0 : 255.0;
+        const scale = depth <= this.cv.CV_8S
+            ? 1.0
+            : depth <= this.cv.CV_32S
+                ? 1.0 / 256.0
+                : 255.0;
         const shift = depth === this.cv.CV_8S || depth === this.cv.CV_16S ? 128.0 : 0.0;
         mat.convertTo(img, this.cv.CV_8U, scale, shift);
         // converts the img type to cv.CV_8UC4
@@ -297,7 +293,7 @@ export class WebARKitCoreCV {
             case this.cv.CV_8UC4:
                 break;
             default:
-                throw new Error('Bad number of channels (Source image must have 1, 3 or 4 channels)');
+                throw new Error("Bad number of channels (Source image must have 1, 3 or 4 channels)");
         }
         const clampedArray = new ImageData(new Uint8ClampedArray(img.data), img.cols, img.rows);
         img.delete();
