@@ -72,6 +72,7 @@ export class WebARKitCoreCV {
   }
 
   track(msg: any) {
+    console.log("Tracking...", msg);
     const imageData = new ImageData(
       new Uint8ClampedArray(msg.imagedata),
       msg.vWidth,
