@@ -16,7 +16,6 @@ ctx.onmessage = (e: MessageEvent<any>) => {
     }
     case "process": {
       next = msg.imagedata;
-      _msg = msg;
       process(msg);
     }
   }
@@ -39,26 +38,19 @@ const loadTrackables = (msg: any) => {
 
 ctx.addEventListener("loaded", (e: any) => {
   ocv = e.detail.CV;
-  //process(_msg);
-  markerResult = ocv.track(_msg);
-  ctx.postMessage(markerResult);
 });
 
 const process = (msg: any) => {
-  // markerResult = null;
-  console.log(ocv);
+  markerResult = null;
+    if (ocv && ocv.track) {
 
-  if (ocv && ocv.track) {
-    console.log(ocv);
+      markerResult = ocv.track(msg);
+    }
 
-    markerResult = ocv.track(msg);
-  }
-  console.log(markerResult);
-
-  if (markerResult != null) {
-    ctx.postMessage(markerResult);
-  } else {
-    ctx.postMessage({ type: "not found" });
-  }
-  next = <ImageData>(<unknown>null);
+    if (markerResult != null) {
+      ctx.postMessage(markerResult);
+    } else {
+      ctx.postMessage({type: "not found"});
+    }
+    next = <ImageData>(<unknown>null);
 };

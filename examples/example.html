@@ -44,7 +44,7 @@
         cameraView.initialize(videoSettingData).then(() => {
             console.log(cameraView.getImage())
             if (track.isLoaded) {
-                webarkit.track(track.trackers, cameraView.getImage()).then((t) => {
+                webarkit.track(track.trackers, cameraView.image).then((t) => {
                     console.log('tracker: ', t);
                     window.addEventListener("getMatrix", function (e) {
                         console.log(e.detail);
