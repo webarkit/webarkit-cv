@@ -30,7 +30,6 @@ export class WebARKitCoreCV {
         this.version = "4.7.0";
         console.info("WebARKitCoreCV ", this.version);
         this.orb = new this.cv.ORB(1000); // And then immediately create an ORB
-        console.log(this.orb);
         this.bfMatcher = new this.cv.BFMatcher(this.cv.NORM_HAMMING, true); // And at the same time the matcher
         this.memoryData = [];
         console.log(Object.keys(this.cv));
@@ -57,6 +56,9 @@ export class WebARKitCoreCV {
     }
     track(msg) {
         console.log("Tracking...", msg);
+        if (!msg.imagedata) {
+            return;
+        }
         const imageData = new ImageData(new Uint8ClampedArray(msg.imagedata), msg.vWidth, msg.vHeight);
         return this.estimateCameraPosition({ id: 0, imageData: imageData });
     }

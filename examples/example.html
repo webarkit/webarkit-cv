@@ -3,35 +3,40 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=0.5, maximum-scale=1">
+    <!--<meta http-equiv="X-UA-Compatible" content="IE=edge">-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=0.5, maximum-scale=1" />
+    <link rel="stylesheet" href="css/nft-style.css" />
     <title>A simple example with webarkit-cv</title>
 </head>
 
 <body>
+
+    <div id="app">
+        <video id="video"  muted playsinline autoplay></video>
+    </div>
+
     <img src="pinball.jpg" id="pinball" style="display: none;">
-    <video id="video" width="640" height="480" muted playsinline autoplay></video>
+
     <script src="../dist/webarkitCV.js"></script>
     <script>
         console.log(WebARKitCV);
 
-        var video = document.getElementById('video');
+        const video = document.getElementById('video');
 
         const cameraView = new WebARKitCV.CameraViewRenderer(video);
-        console.log(cameraView)
 
-        var videoSettingData = {
-            width: { min: 640, max: 800 },
-            height: { min: 480, max: 600 },
+        const videoSettingData = {
+            width: {min: 640, max: 800},
+            height: {min: 480, max: 600},
             facingMode: "environment",
             targetFrameRate: 60
-        }
+        };
 
-        var oWidth = 320;
-        var oHeight = 240;
+        const oWidth = 320;
+        const oHeight = 240;
 
         const webarkit = new WebARKitCV.WebARKitCV(video);
-        var overlayCanvas;
+        let overlayCanvas;
         createOverlayCanvas();
 
         webarkit.setWidth(320)
@@ -42,35 +47,34 @@
         const track = webarkit.build();
 
         cameraView.initialize(videoSettingData).then(() => {
-            console.log(cameraView.getImage())
             if (track.isLoaded) {
-                webarkit.track(track.trackers, cameraView.image).then((t) => {
-                    console.log('tracker: ', t);
-                    window.addEventListener("getMatrix", function (e) {
-                        console.log(e.detail);
-                        drawOverlay(e.detail.finalImage);
+               let _update = function() {
+                    console.log(webarkit)
+                    console.log(cameraView.image)
+                    webarkit.track(track.trackers, cameraView.image).then((t) => {
+                        console.log('tracker: ', t);
+                        window.addEventListener("getMatrix", function (e) {
+                            console.log('infos from getMatix Event: ', e.detail);
+                            drawOverlay(e.detail.finalImage);
+                        })
+                        window.addEventListener("lostMarker", function (e) {
+                            console.log('infos from lostMarker Event: ', e.detail);
+                        })
                     })
-                })
+                    requestAnimationFrame(_update);
+               }
+                _update();
             }
         })
 
         function createOverlayCanvas() {
             overlayCanvas = document.createElement("canvas");
-            setVideoStyle(overlayCanvas);
             overlayCanvas.id = "overlay";
-            overlayCanvas.width = oWidth;
-            overlayCanvas.height = oHeight;
-            overlayCanvas.style.zIndex = 1;
-            document.body.appendChild(overlayCanvas);
+            document.getElementById("app").appendChild(overlayCanvas);
         }
         function drawOverlay(imageData) {
             const overlayCtx = overlayCanvas.getContext("2d");
             overlayCtx.putImageData(imageData, 0, 0);
-        }
-        function setVideoStyle(elem) {
-            elem.style.position = "absolute";
-            elem.style.top = 0;
-            elem.style.left = 0;
         }
 
     </script>

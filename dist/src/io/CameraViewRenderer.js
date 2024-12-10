@@ -55,6 +55,7 @@ export class CameraViewRenderer {
         this.canvas_process = document.createElement("canvas");
         this.context_process = this.canvas_process.getContext("2d", {
             alpha: false,
+            willReadFrequently: true,
         });
         this._video = video;
         this.target = window || global;
@@ -104,9 +105,7 @@ export class CameraViewRenderer {
     get image() {
         const now = Date.now();
         if (now - this.lastCache > 1000 / this.targetFrameRate) {
-            console.log(this.video);
             this.context_process.drawImage(this.video, 0, 0, this.vw, this.vh, this.ox, this.oy, this.w, this.h);
-            console.log(this.context_process);
             const imageData = this.context_process.getImageData(0, 0, this.pw, this.ph);
             if (this.imageDataCache == null) {
                 this.imageDataCache = imageData.data;
@@ -122,7 +121,7 @@ export class CameraViewRenderer {
     prepareImage() {
         this.vw = this._video.videoWidth;
         this.vh = this._video.videoHeight;
-        var pscale = 320 / Math.max(this.vw, (this.vh / 3) * 4);
+        const pscale = 320 / Math.max(this.vw, (this.vh / 3) * 4);
         // Void float point
         this.w = Math.floor(this.vw * pscale);
         this.h = Math.floor(this.vh * pscale);

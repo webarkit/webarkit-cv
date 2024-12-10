@@ -22,6 +22,7 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
         this.trackableWidth = twidth;
         this.trackableHeight = theight;
         this.target = window || global;
+        console.log(this.target);
     }
     async initialize() {
         console.log("WebARKitCVOrbWorker initialized");
@@ -38,22 +39,13 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
             return;
         }
         this._processing = true;
+        console.log("WebARKitCVOrbWorker process imagedata: ", imagedata);
         this.worker.postMessage({
             type: "process",
             imagedata: imagedata.data.buffer,
             vWidth: this.vw,
             vHeight: this.vh,
         });
-        this.worker.onmessage = (ev) => {
-            var msg = ev.data;
-            console.log(msg);
-            switch (msg.type) {
-                case "found": {
-                    this.found(msg);
-                    break;
-                }
-            }
-        };
     }
     loadTrackables() {
         this.worker.postMessage({
@@ -62,6 +54,21 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
             trackableWidth: this.trackableWidth,
             trackableHeight: this.trackableHeight,
         });
+        this.worker.onmessage = (ev) => {
+            const msg = ev.data;
+            //console.log(msg);
+            switch (msg.type) {
+                case "found": {
+                    this.found(msg);
+                    break;
+                }
+                case "not found": {
+                    this.found(null);
+                    break;
+                }
+            }
+            this._processing = false;
+        };
         return Promise.resolve(true);
     }
     /**
@@ -76,12 +83,17 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
         if (!msg) {
             // commenting out this routine see https://github.com/webarkit/ARnft/pull/184#issuecomment-853400903
             //if (world) {
-            world = null;
+            //world = null;
             /* const nftTrackingLostEvent = new CustomEvent<object>("nftTrackingLost-" + this.uuid + "-" + this.name, {
                   detail: { name: this.name },
               });
               this.target.dispatchEvent(nftTrackingLostEvent);*/
             //}
+            finalImage = msg.finalImage;
+            const lostEvent = new CustomEvent("lostMarker", {
+                detail: { matrix: null, corners: null, finalImage: finalImage },
+            });
+            this.target.dispatchEvent(lostEvent);
         }
         else {
             world = JSON.parse(msg.matrix);
