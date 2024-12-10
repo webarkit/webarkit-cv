@@ -121,6 +121,7 @@ export class WebARKitCV {
             let _update = () => {
                 if (true) {
                     this.trackableWorkers.forEach((trackable) => {
+                        //console.log("trackable imgData: ", imgData);
                         trackable.process(imgData);
                     });
                 }
