@@ -22,7 +22,6 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
         this.trackableWidth = twidth;
         this.trackableHeight = theight;
         this.target = window || global;
-        console.log(this.target);
     }
     async initialize() {
         console.log("WebARKitCVOrbWorker initialized");
@@ -89,7 +88,8 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
               });
               this.target.dispatchEvent(nftTrackingLostEvent);*/
             //}
-            finalImage = msg.finalImage;
+            finalImage = new ImageData(this.vw, this.vh);
+            console.log("finalImage: ", finalImage);
             const lostEvent = new CustomEvent("lostMarker", {
                 detail: { matrix: null, corners: null, finalImage: finalImage },
             });
