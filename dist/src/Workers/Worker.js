@@ -2,7 +2,7 @@ import { WebARKitCoreCV } from "../core/WebARKitCoreCV2";
 const ctx = self;
 var next = null;
 var _msg;
-let ocv = null;
+var ocv = null;
 let markerResult = null;
 ctx.onmessage = (e) => {
     const msg = e.data;
@@ -23,29 +23,28 @@ const loadTrackables = (msg) => {
     const onLoad = (core) => {
         ocv = core;
         ocv.loadTrackables(msg);
-        const loadedEvent = new CustomEvent("loaded", { detail: { CV: ocv } });
-        ctx.dispatchEvent(loadedEvent);
+        //const loadedEvent = new CustomEvent("loaded", { detail: { CV: ocv } });
+        //ctx.dispatchEvent(loadedEvent);
     };
     const onError = function (error) {
         console.error(error);
     };
     WebARKitCoreCV.initCV().then(onLoad).catch(onError);
 };
-ctx.addEventListener("loaded", (e) => {
-    ocv = e.detail.CV;
-    if (ocv && ocv.track) {
-        markerResult = ocv.track(_msg);
-        if (!next) {
-            ctx.postMessage({ type: "not found", markerResult });
-            return;
-        }
-        else {
-            //markerResult = ocv.track(_msg);
-            ctx.postMessage(markerResult);
-        }
+/*ctx.addEventListener("loaded", (e: any) => {
+  ocv = e.detail.CV;
+  if (ocv && ocv.track) {
+    markerResult = ocv.track(_msg);
+    if (!next) {
+      ctx.postMessage({ type: "not found", markerResult });
+      return;
+    } else {
+      //markerResult = ocv.track(_msg);
+      ctx.postMessage(markerResult);
     }
-    ctx.postMessage(markerResult);
-});
+  }
+  //ctx.postMessage(markerResult);
+});*/
 const process = (msg) => {
     markerResult = null;
     if (ocv && ocv.track) {

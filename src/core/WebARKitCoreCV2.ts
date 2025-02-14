@@ -1,5 +1,7 @@
 // @ts-ignore
-import _cv from "../../build/opencv_js";
+// @ts-nocheck
+//import _cv from "../../build/opencv_js";
+import { cv2, waitCV } from "./opencv-helper"
 
 export class WebARKitCoreCV {
   private cv: any;
@@ -29,17 +31,19 @@ export class WebARKitCoreCV {
 
   async _initialize() {
     // Create an instance of the OpenCV Emscripten C++ code.
-    this.cv = await _cv();
+    //cv2 = await _cv();
+    await waitCV();
 
     console.log("[WebARKitCoreCV]", "OpenCV initialized");
 
     this.version = "4.7.0";
     console.info("WebARKitCoreCV ", this.version);
-
-    this.orb = new this.cv.ORB(1000); // And then immediately create an ORB
-    this.bfMatcher = new this.cv.BFMatcher(this.cv.NORM_HAMMING, true); // And at the same time the matcher
+    //@ts-ignore
+    this.orb = new cv2.ORB(1000); // And then immediately create an ORB
+    //@ts-ignore
+    this.bfMatcher = new cv2.BFMatcher(cv2.NORM_HAMMING, true); // And at the same time the matcher
     this.memoryData = [];
-    console.log(Object.keys(this.cv));
+    console.log(Object.keys(cv2));
 
     setTimeout(() => {
       this.dispatchEvent({
@@ -56,7 +60,8 @@ export class WebARKitCoreCV {
   }
 
   loadSourceImage(imageData: ImageData) {
-    const img = this.cv.matFromImageData(imageData);
+    //@ts-ignore
+    const img = cv2.matFromImageData(imageData);
 
     const imgGray = this.convertToGray(img);
     img.delete();
@@ -75,6 +80,7 @@ export class WebARKitCoreCV {
     if (!msg.imagedata) {
       return;
     }
+    console.log("msg-imagedata while Tracking...", msg.imagedata);
     const imageData = new ImageData(
       new Uint8ClampedArray(msg.imagedata),
       msg.vWidth,
@@ -90,22 +96,25 @@ export class WebARKitCoreCV {
     id: any;
     imageData: ImageData;
   }) {
-    const img = this.cv.matFromImageData(imageData);
+    //@ts-ignore
+    const img = cv2.matFromImageData(imageData);
     const imgGray = this.convertToGray(img);
     img.delete();
-
-    let finalImage = new this.cv.Mat();
-    this.cv.cvtColor(imgGray, finalImage, this.cv.COLOR_GRAY2RGB);
+    //@ts-ignore
+    let finalImage = new cv2.Mat();
+    //@ts-ignore
+    cv2.cvtColor(imgGray, finalImage, cv2.COLOR_GRAY2RGB);
 
     let queryPointsMat = null;
     let trainPointsMat = null;
     //console.log(memoryData[id])
     if (this.memoryData[id].trainPointsMat) {
-      const nextPoints = new this.cv.Mat();
-      const status = new this.cv.Mat();
-      const errors = new this.cv.Mat();
+      /*@ts-ignore*/
+      const nextPoints = new cv2.Mat();
+      const status = new cv2.Mat();
+      const errors = new cv2.Mat();
 
-      this.cv.calcOpticalFlowPyrLK(
+      cv2.calcOpticalFlowPyrLK(
         this.memoryData[id].lastFrame,
         imgGray,
         this.memoryData[id].trainPointsMat,
@@ -147,11 +156,11 @@ export class WebARKitCoreCV {
       const mtx = this.getCameraMatrix(imgGray.rows, imgGray.cols);
       const dist = this.getDistortion();
 
-      const rvec = new this.cv.Mat();
-      const tvec = new this.cv.Mat();
+      const rvec = new cv2.Mat();
+      const tvec = new cv2.Mat();
 
-      const inliers = new this.cv.Mat();
-      this.cv.solvePnPRansac(
+      const inliers = new cv2.Mat();
+      cv2.solvePnPRansac(
         queryPointsMat,
         trainPointsMat,
         mtx,
@@ -229,7 +238,7 @@ export class WebARKitCoreCV {
   // Filtering out Mat
   private filter(mat: any, arr: any[]) {
     const rows = arr.reduce((sum, flag) => (flag ? sum + 1 : sum), 0);
-    const newMat = new this.cv.Mat(rows, mat.cols, mat.type());
+    const newMat = new cv2.Mat(rows, mat.cols, mat.type());
 
     let j = 0;
     for (let i = 0; i < mat.rows; i++) {
@@ -241,7 +250,7 @@ export class WebARKitCoreCV {
 
   private draw(finalImage: any, projectionMatrix: any) {
     const _axis = [0, 0, 0, 1, 30, 0, 0, 1, 0, 30, 0, 1, 0, 0, -30, 1];
-    const axisT = this.cv.matFromArray(4, 4, this.cv.CV_64F, _axis);
+    const axisT = cv2.matFromArray(4, 4, cv2.CV_64F, _axis);
     const axis = axisT.t();
 
     console.log(projectionMatrix);
@@ -257,9 +266,9 @@ export class WebARKitCoreCV {
       });
     }
 
-    this.cv.line(finalImage, pointsArr[0], pointsArr[1], [255, 0, 0, 255], 2);
-    this.cv.line(finalImage, pointsArr[0], pointsArr[2], [0, 255, 0, 255], 2);
-    this.cv.line(finalImage, pointsArr[0], pointsArr[3], [0, 0, 255, 255], 2);
+    cv2.line(finalImage, pointsArr[0], pointsArr[1], [255, 0, 0, 255], 2);
+    cv2.line(finalImage, pointsArr[0], pointsArr[2], [0, 255, 0, 255], 2);
+    cv2.line(finalImage, pointsArr[0], pointsArr[3], [0, 0, 255, 255], 2);
 
     axisT.delete();
     axis.delete();
@@ -269,7 +278,7 @@ export class WebARKitCoreCV {
 
   private drawPoints(finalImage: any, mat: any) {
     for (let i = 0; i < mat.rows; i++) {
-      this.cv.circle(
+      cv2.circle(
         finalImage,
         { x: mat.floatAt(i, 0), y: mat.floatAt(i, 1) },
         2,
@@ -283,14 +292,14 @@ export class WebARKitCoreCV {
       Math.hypot(cols, rows) / 2 / Math.tan(((this.angle / 2) * Math.PI) / 180);
     //console.log(f)
     const _mtx = [f, 0, cols / 2, 0, f, rows / 2, 0, 0, 1];
-    const mtx = this.cv.matFromArray(3, 3, this.cv.CV_64F, _mtx);
+    const mtx = cv2.matFromArray(3, 3, cv2.CV_64F, _mtx);
 
     return mtx;
   }
 
   private getDistortion() {
     const _dist = [0, 0, 0, 0];
-    const dist = this.cv.matFromArray(1, _dist.length, this.cv.CV_64F, _dist);
+    const dist = cv2.matFromArray(1, _dist.length, cv2.CV_64F, _dist);
     return dist;
   }
 
@@ -302,7 +311,7 @@ export class WebARKitCoreCV {
     const queryPoints = [];
     const trainPoints = [];
 
-    const matches = new this.cv.DMatchVector();
+    const matches = new cv2.DMatchVector();
 
     if (trainImageData.keypoints.size() > 5)
       //console.log(trainImageData.keypoints.size())
@@ -331,16 +340,16 @@ export class WebARKitCoreCV {
       ]);
     }
 
-    const queryPointsMat = this.cv.matFromArray(
+    const queryPointsMat = cv2.matFromArray(
       queryPoints.length,
       1,
-      this.cv.CV_32FC3,
+      cv2.CV_32FC3,
       queryPoints.flat(),
     );
-    const trainPointsMat = this.cv.matFromArray(
+    const trainPointsMat = cv2.matFromArray(
       trainPoints.length,
       1,
-      this.cv.CV_32FC2,
+      cv2.CV_32FC2,
       trainPoints.flat(),
     );
 
@@ -349,26 +358,26 @@ export class WebARKitCoreCV {
   }
 
   convertToGray(img: any) {
-    const imgGray = new this.cv.Mat();
-    this.cv.cvtColor(img, imgGray, this.cv.COLOR_BGR2GRAY);
+    const imgGray = new cv2.Mat();
+    cv2.cvtColor(img, imgGray, cv2.COLOR_BGR2GRAY);
 
     return imgGray;
   }
 
   private dot(a: any, b: any) {
-    const res = new this.cv.Mat();
-    const zeros = this.cv.Mat.zeros(a.cols, b.rows, this.cv.CV_64F);
-    this.cv.gemm(a, b, 1, zeros, 0, res);
+    const res = new cv2.Mat();
+    const zeros = cv2.Mat.zeros(a.cols, b.rows, cv2.CV_64F);
+    cv2.gemm(a, b, 1, zeros, 0, res);
     zeros.delete();
 
     return res;
   }
 
   private getProjectionMatrix(rvec: any, tvec: any, mtx: any) {
-    const rotationMatrix = new this.cv.Mat();
-    this.cv.Rodrigues(rvec, rotationMatrix);
+    const rotationMatrix = new cv2.Mat();
+    cv2.Rodrigues(rvec, rotationMatrix);
 
-    const extrinsicMatrix = new this.cv.Mat(3, 4, this.cv.CV_64F);
+    const extrinsicMatrix = new cv2.Mat(3, 4, cv2.CV_64F);
 
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
@@ -386,9 +395,9 @@ export class WebARKitCoreCV {
   }
 
   private getImageKeypoints(image: any) {
-    const keypoints = new this.cv.KeyPointVector(); // key points
-    const none = new this.cv.Mat();
-    const descriptors = new this.cv.Mat(); // Point descriptors (i.e. some unique value)
+    const keypoints = new cv2.KeyPointVector(); // key points
+    const none = new cv2.Mat();
+    const descriptors = new cv2.Mat(); // Point descriptors (i.e. some unique value)
     this.orb.detectAndCompute(image, none, keypoints, descriptors);
 
     none.delete();
@@ -402,28 +411,28 @@ export class WebARKitCoreCV {
   }
 
   private imageDataFromMat(mat: any) {
-    // converts the mat type to this.cv.CV_8U
-    const img = new this.cv.Mat();
+    // converts the mat type to cv2.CV_8U
+    const img = new cv2.Mat();
     const depth = mat.type() % 8;
     const scale =
-      depth <= this.cv.CV_8S
+      depth <= cv2.CV_8S
         ? 1.0
-        : depth <= this.cv.CV_32S
+        : depth <= cv2.CV_32S
           ? 1.0 / 256.0
           : 255.0;
     const shift =
-      depth === this.cv.CV_8S || depth === this.cv.CV_16S ? 128.0 : 0.0;
-    mat.convertTo(img, this.cv.CV_8U, scale, shift);
+      depth === cv2.CV_8S || depth === cv2.CV_16S ? 128.0 : 0.0;
+    mat.convertTo(img, cv2.CV_8U, scale, shift);
 
     // converts the img type to cv.CV_8UC4
     switch (img.type()) {
-      case this.cv.CV_8UC1:
-        this.cv.cvtColor(img, img, this.cv.COLOR_GRAY2RGBA);
+      case cv2.CV_8UC1:
+        cv2.cvtColor(img, img, cv2.COLOR_GRAY2RGBA);
         break;
-      case this.cv.CV_8UC3:
-        this.cv.cvtColor(img, img, this.cv.COLOR_RGB2RGBA);
+      case cv2.CV_8UC3:
+        cv2.cvtColor(img, img, cv2.COLOR_RGB2RGBA);
         break;
-      case this.cv.CV_8UC4:
+      case cv2.CV_8UC4:
         break;
       default:
         throw new Error(
@@ -449,8 +458,8 @@ export class WebARKitCoreCV {
 
   fill_output = (H: any, valid: boolean) => {
     let output = new Float64Array(17);
-    let warped = new this.cv.Mat(2, 2, this.cv.CV_64FC2);
-    this.cv.perspectiveTransform(this.corners, warped, H);
+    let warped = new cv2.Mat(2, 2, cv2.CV_64FC2);
+    cv2.perspectiveTransform(this.corners, warped, H);
 
     output[0] = H.doubleAt(0, 0);
     output[1] = H.doubleAt(0, 1);

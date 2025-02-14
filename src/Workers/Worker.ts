@@ -4,7 +4,7 @@ const ctx: Worker = self as any;
 var next: any = null;
 
 var _msg: any;
-let ocv: any = null;
+var ocv: any = null;
 let markerResult: any = null;
 
 ctx.onmessage = (e: MessageEvent<any>) => {
@@ -27,8 +27,8 @@ const loadTrackables = (msg: any) => {
   const onLoad = (core: any) => {
     ocv = core;
     ocv.loadTrackables(msg);
-    const loadedEvent = new CustomEvent("loaded", { detail: { CV: ocv } });
-    ctx.dispatchEvent(loadedEvent);
+    //const loadedEvent = new CustomEvent("loaded", { detail: { CV: ocv } });
+    //ctx.dispatchEvent(loadedEvent);
   };
 
   const onError = function (error: any) {
@@ -38,7 +38,7 @@ const loadTrackables = (msg: any) => {
   WebARKitCoreCV.initCV().then(onLoad).catch(onError);
 };
 
-ctx.addEventListener("loaded", (e: any) => {
+/*ctx.addEventListener("loaded", (e: any) => {
   ocv = e.detail.CV;
   if (ocv && ocv.track) {
     markerResult = ocv.track(_msg);
@@ -50,8 +50,8 @@ ctx.addEventListener("loaded", (e: any) => {
       ctx.postMessage(markerResult);
     }
   }
-  ctx.postMessage(markerResult);
-});
+  //ctx.postMessage(markerResult);
+});*/
 
 const process = (msg: any) => {
   markerResult = null;
