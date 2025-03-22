@@ -10,7 +10,7 @@ const { version } = packageJson;
 
 export class WebARKitCV implements WebARKitCVBuilder {
   private webarkit: WebARKitBase;
-  private version: string;
+  private readonly version: string;
   private trackableCount: number = 0;
   private trackableWorkers: WebARKitCVOrbWorker[] = [];
   /**
@@ -96,7 +96,11 @@ export class WebARKitCV implements WebARKitCVBuilder {
   public loadTrackables(): WebARKitCVBuilder {
     const trackables = this.webarkit.trackables;
     trackables!.forEach((trackable, index: number) => {
-      var data = imread(trackable.name);
+      let data = imread(trackable.name);
+      if (!data) {
+        console.error(`Failed to load image data for trackable: ${trackable.name}`);
+        return; // Skip this trackable
+      }
       this.trackableWorkers.push(
         new WebARKitCVOrbWorker(
           trackables!,
@@ -146,11 +150,13 @@ export class WebARKitCV implements WebARKitCVBuilder {
     console.info("Start tracking!");
     try {
       let _update = () => {
-        if (true) {
+        if (imgData && imgData.data && imgData.width > 0 && imgData.height > 0) {
           this.trackableWorkers.forEach((trackable) => {
             //console.log("trackable imgData: ", imgData);
             trackable.process(imgData);
           });
+        } else {
+          console.warn("imgData is invalid or empty. Skipping tracking.");
         }
         requestAnimationFrame(_update);
       };
