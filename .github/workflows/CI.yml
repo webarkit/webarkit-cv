@@ -9,12 +9,12 @@ jobs:
     strategy:
       matrix:
         node:
-          - 20.x
+          - 22.13.x
 
     # Packages 'firefox' and 'chromium' are pre-installed.
     #
     # https://github.com/actions/virtual-environments/blob/ubuntu20/20210302.0/images/linux/Ubuntu2004-README.md
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     name: Node.js ${{ matrix.node }}
     steps:
       - uses: actions/checkout@v4
