@@ -98,7 +98,9 @@ export class WebARKitCV implements WebARKitCVBuilder {
     trackables!.forEach((trackable, index: number) => {
       let data = imread(trackable.name);
       if (!data) {
-        console.error(`Failed to load image data for trackable: ${trackable.name}`);
+        console.error(
+          `Failed to load image data for trackable: ${trackable.name}`,
+        );
         return; // Skip this trackable
       }
       this.trackableWorkers.push(
@@ -150,7 +152,12 @@ export class WebARKitCV implements WebARKitCVBuilder {
     console.info("Start tracking!");
     try {
       let _update = () => {
-        if (imgData && imgData.data && imgData.width > 0 && imgData.height > 0) {
+        if (
+          imgData &&
+          imgData.data &&
+          imgData.width > 0 &&
+          imgData.height > 0
+        ) {
           this.trackableWorkers.forEach((trackable) => {
             //console.log("trackable imgData: ", imgData);
             trackable.process(imgData);

@@ -3,7 +3,9 @@
  * @param {any} imageSource
  * @returns {ImageData} ImageData
  */
-export function imread(imageSource: string | HTMLImageElement | HTMLCanvasElement): ImageData | null {
+export function imread(
+  imageSource: string | HTMLImageElement | HTMLCanvasElement,
+): ImageData | null {
   let img: any;
   if (typeof imageSource === "string") {
     img = document.getElementById(imageSource);
@@ -44,7 +46,12 @@ export function imread(imageSource: string | HTMLImageElement | HTMLCanvasElemen
   }
 
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  if (!imageData || !imageData.data || imageData.width <= 0 || imageData.height <= 0) {
+  if (
+    !imageData ||
+    !imageData.data ||
+    imageData.width <= 0 ||
+    imageData.height <= 0
+  ) {
     console.error("Invalid ImageData.");
     return null;
   }
