@@ -3,4 +3,4 @@
  * @param {any} imageSource
  * @returns {ImageData} ImageData
  */
-export declare function imread(imageSource: any): ImageData;
+export declare function imread(imageSource: string | HTMLImageElement | HTMLCanvasElement): ImageData | null;

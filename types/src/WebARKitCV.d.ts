@@ -3,7 +3,7 @@ import { WebARKitBase } from "./interfaces/WebARKitCVBuilder";
 import { ITracker } from "./interfaces/Trackers";
 export declare class WebARKitCV implements WebARKitCVBuilder {
     private webarkit;
-    private version;
+    private readonly version;
     private trackableCount;
     private trackableWorkers;
     /**
