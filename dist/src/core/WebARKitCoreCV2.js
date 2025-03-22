@@ -209,13 +209,11 @@ export class WebARKitCoreCV {
         const f = Math.hypot(cols, rows) / 2 / Math.tan(((this.angle / 2) * Math.PI) / 180);
         //console.log(f)
         const _mtx = [f, 0, cols / 2, 0, f, rows / 2, 0, 0, 1];
-        const mtx = cv2.matFromArray(3, 3, cv2.CV_64F, _mtx);
-        return mtx;
+        return cv2.matFromArray(3, 3, cv2.CV_64F, _mtx);
     }
     getDistortion() {
         const _dist = [0, 0, 0, 0];
-        const dist = cv2.matFromArray(1, _dist.length, cv2.CV_64F, _dist);
-        return dist;
+        return cv2.matFromArray(1, _dist.length, cv2.CV_64F, _dist);
     }
     matchKeypoints(queryImageData, trainImageData, threshold = 30) {
         const queryPoints = [];

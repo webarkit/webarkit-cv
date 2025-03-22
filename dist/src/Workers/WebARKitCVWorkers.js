@@ -30,7 +30,7 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     }
     /**
      * This is the function that will pass the video stream to the worker.
-     * @param imageData the image data from the video stream.
+     * @param imagedata the image data from the video stream.
      * @returns void
      */
     process(imagedata) {

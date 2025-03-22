@@ -1,10 +1,10 @@
 import { WebARKitCoreCV } from "../core/WebARKitCoreCV2";
 const ctx: Worker = self as any;
 
-var next: any = null;
+let next: any = null;
 
-var _msg: any;
-var ocv: any = null;
+let _msg: any;
+let ocv: any = null;
 let markerResult: any = null;
 
 ctx.onmessage = (e: MessageEvent<any>) => {

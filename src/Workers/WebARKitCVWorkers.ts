@@ -5,7 +5,7 @@ export abstract class AbstractWebARKitCVWorker {
   protected trackables: Map<number, ITrackable>;
   protected vw: number;
   protected vh: number;
-  constructor(
+  protected constructor(
     trackables: Map<number, ITrackable>,
     width: number,
     height: number,
@@ -20,9 +20,9 @@ export abstract class AbstractWebARKitCVWorker {
 
 export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
   private worker!: Worker;
-  private data: any;
-  private trackableWidth: number;
-  private trackableHeight: number;
+  private readonly data: any;
+  private readonly trackableWidth: number;
+  private readonly trackableHeight: number;
   private _processing: boolean = false;
   private target: EventTarget;
   constructor(
@@ -48,7 +48,7 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
 
   /**
    * This is the function that will pass the video stream to the worker.
-   * @param imageData the image data from the video stream.
+   * @param imagedata the image data from the video stream.
    * @returns void
    */
   public process(imagedata: ImageData): void {

@@ -1,8 +1,8 @@
 import { WebARKitCoreCV } from "../core/WebARKitCoreCV2";
 const ctx = self;
-var next = null;
-var _msg;
-var ocv = null;
+let next = null;
+let _msg;
+let ocv = null;
 let markerResult = null;
 ctx.onmessage = (e) => {
     const msg = e.data;
