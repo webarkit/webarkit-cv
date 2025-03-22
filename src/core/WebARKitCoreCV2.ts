@@ -1,7 +1,7 @@
 // @ts-ignore
 // @ts-nocheck
 //import _cv from "../../build/opencv_js";
-import { cv2, waitCV } from "./opencv-helper"
+import { cv2, waitCV } from "./opencv-helper";
 
 export class WebARKitCoreCV {
   private cv: any;
@@ -412,13 +412,8 @@ export class WebARKitCoreCV {
     const img = new cv2.Mat();
     const depth = mat.type() % 8;
     const scale =
-      depth <= cv2.CV_8S
-        ? 1.0
-        : depth <= cv2.CV_32S
-          ? 1.0 / 256.0
-          : 255.0;
-    const shift =
-      depth === cv2.CV_8S || depth === cv2.CV_16S ? 128.0 : 0.0;
+      depth <= cv2.CV_8S ? 1.0 : depth <= cv2.CV_32S ? 1.0 / 256.0 : 255.0;
+    const shift = depth === cv2.CV_8S || depth === cv2.CV_16S ? 128.0 : 0.0;
     mat.convertTo(img, cv2.CV_8U, scale, shift);
 
     // converts the img type to cv.CV_8UC4
