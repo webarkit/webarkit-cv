@@ -81,11 +81,53 @@ export class WebARKitCoreCV {
       return;
     }
     console.log("msg-imagedata while Tracking...", msg.imagedata);
-    const imageData = new ImageData(
-      new Uint8ClampedArray(msg.imagedata),
-      msg.vWidth,
-      msg.vHeight,
-    );
+    console.log("width and height from msg: ", msg.vWidth, msg.vHeight)
+    // Use provided video width/height (sent by the main thread). Previously
+    // this was hard-coded to 320x240 which causes ImageData construction to
+    // throw if the buffer length doesn't match. Fall back to 320x240 when
+    // values are missing.
+    const width = Number.isFinite(msg.vWidth) ? msg.vWidth : 320;
+    const height = Number.isFinite(msg.vHeight) ? msg.vHeight : 240;
+
+    const buf = new Uint8ClampedArray(msg.imagedata);
+    const expectedLen = 4 * width * height;
+    if (buf.length !== expectedLen) {
+      // If the incoming buffer length doesn't match, log a warning and try
+      // to infer a matching width/height by using the provided vWidth or
+      // falling back to a best-effort width derived from the buffer length.
+      // This makes the worker more robust to mismatched sizes from the host.
+      // eslint-disable-next-line no-console
+      console.warn(
+        `ImageData buffer length (${buf.length}) does not match 4*width*height (${expectedLen}). Falling back to derived dimensions.",`,
+        { bufLen: buf.length, width, height },
+      );
+
+      // Derive width from vWidth when available, otherwise try to compute
+      // a width assuming a common aspect ratio. Keep width integer.
+      let derivedWidth = width;
+      let derivedHeight = height;
+      if (!Number.isFinite(msg.vWidth) || !Number.isFinite(msg.vHeight)) {
+        // try to infer width from buffer length: pick width = Math.floor(Math.sqrt(bufLen/4))
+        const pixels = Math.floor(buf.length / 4);
+        derivedWidth = Math.max(1, Math.floor(Math.sqrt(pixels)));
+        derivedHeight = Math.max(1, Math.floor(pixels / derivedWidth));
+      }
+
+      // If still mismatched, slice or pad the buffer to expected size for
+      // the derived dimensions to avoid ImageData construction exceptions.
+      const derivedExpected = 4 * derivedWidth * derivedHeight;
+      let finalBuf;
+      if (buf.length > derivedExpected) finalBuf = buf.slice(0, derivedExpected);
+      else if (buf.length < derivedExpected) {
+        finalBuf = new Uint8ClampedArray(derivedExpected);
+        finalBuf.set(buf);
+      } else finalBuf = buf;
+
+      const imageData = new ImageData(finalBuf, derivedWidth, derivedHeight);
+      return this.estimateCameraPosition({ id: 0, imageData: imageData });
+    }
+
+    const imageData = new ImageData(buf, width, height);
     return this.estimateCameraPosition({ id: 0, imageData: imageData });
   }
 
@@ -108,34 +150,68 @@ export class WebARKitCoreCV {
     let queryPointsMat = null;
     let trainPointsMat = null;
     //console.log(memoryData[id])
-    if (this.memoryData[id].trainPointsMat) {
+    // Use calcOpticalFlowPyrLK only when we have both the previous frame and
+    // train points available. Guard and catch errors so we don't pass
+    // undefined into the wasm binding (which causes toWireType errors).
+    if (this.memoryData[id].trainPointsMat && this.memoryData[id].lastFrame) {
       /*@ts-ignore*/
       const nextPoints = new cv2.Mat();
       const status = new cv2.Mat();
       const errors = new cv2.Mat();
+      try {
+        cv2.calcOpticalFlowPyrLK(
+          this.memoryData[id].lastFrame,
+          imgGray,
+          this.memoryData[id].trainPointsMat,
+          nextPoints,
+          status,
+          errors,
+        );
 
-      cv2.calcOpticalFlowPyrLK(
-        this.memoryData[id].lastFrame,
-        imgGray,
-        this.memoryData[id].trainPointsMat,
-        nextPoints,
-        status,
-        errors,
-      );
+        const filterArr = [];
+        for (let i = 0; i < status.rows; i++)
+          filterArr.push(status.charAt(i, 0) === 1 && errors.floatAt(i, 0) < 10);
 
-      const filterArr = [];
-      for (let i = 0; i < status.rows; i++)
-        filterArr.push(status.charAt(i, 0) === 1 && errors.floatAt(i, 0) < 10);
+        trainPointsMat = this.filter(nextPoints, filterArr);
+        queryPointsMat = this.filter(
+          this.memoryData[id].queryPointsMat,
+          filterArr,
+        );
+      } catch (err) {
+        // Log helpful diagnostic info and clear memory so we fall back to
+        // descriptor-based matching on the next iteration instead of crashing.
+        // eslint-disable-next-line no-console
+        console.warn("calcOpticalFlowPyrLK failed, skipping optical flow:", err, {
+          lastFrame: this.memoryData[id].lastFrame,
+          trainPointsMat: this.memoryData[id].trainPointsMat,
+        });
 
-      trainPointsMat = this.filter(nextPoints, filterArr);
-      queryPointsMat = this.filter(
-        this.memoryData[id].queryPointsMat,
-        filterArr,
-      );
+        // ensure we don't leak the Mats we created
+        try {
+          status.delete();
+        } catch (e) {}
+        try {
+          errors.delete();
+        } catch (e) {}
+        try {
+          nextPoints.delete();
+        } catch (e) {}
 
-      status.delete();
-      errors.delete();
-      nextPoints.delete();
+        // Reset stored tracking mats to force a fresh keypoint matching next
+        // frame. This avoids repeatedly calling calcOpticalFlow with invalid
+        // internal state.
+        this.clearMemory(this.memoryData[id]);
+      }
+
+      try {
+        status.delete();
+      } catch (e) {}
+      try {
+        errors.delete();
+      } catch (e) {}
+      try {
+        nextPoints.delete();
+      } catch (e) {}
     }
 
     if (!trainPointsMat) {

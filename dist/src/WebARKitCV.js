@@ -123,7 +123,10 @@ export class WebARKitCV {
         console.info("Start tracking!");
         try {
             let _update = () => {
-                if (imgData && imgData.data && imgData.width > 0 && imgData.height > 0) {
+                if (imgData &&
+                    imgData.data &&
+                    imgData.width > 0 &&
+                    imgData.height > 0) {
                     this.trackableWorkers.forEach((trackable) => {
                         //console.log("trackable imgData: ", imgData);
                         trackable.process(imgData);

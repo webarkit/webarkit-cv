@@ -39,6 +39,11 @@ export declare class CameraViewRenderer implements ICameraViewRenderer {
     getFrame(): number;
     getImage(): ImageData;
     get image(): ImageData;
+    /**
+     * Draw the detected corners on the processing canvas.
+     * corners must be an array of 8 numbers: [x0,y0,x1,y1,x2,y2,x3,y3]
+     */
+    drawCorners(corners: number[] | null, color?: string, lineWidth?: number): void;
     prepareImage(): void;
     initialize(videoSettings: VideoSettingData): Promise<boolean>;
     destroy(): void;

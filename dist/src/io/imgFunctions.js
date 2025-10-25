@@ -46,7 +46,10 @@ export function imread(imageSource) {
         return null;
     }
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    if (!imageData || !imageData.data || imageData.width <= 0 || imageData.height <= 0) {
+    if (!imageData ||
+        !imageData.data ||
+        imageData.width <= 0 ||
+        imageData.height <= 0) {
         console.error("Invalid ImageData.");
         return null;
     }
