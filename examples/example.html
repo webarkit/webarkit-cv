@@ -47,6 +47,7 @@
         const track = webarkit.build();
 
         cameraView.initialize(videoSettingData).then(() => {
+            console.log(cameraView)
             if (track.isLoaded) {
                let _update = function() {
                     console.log(webarkit)
