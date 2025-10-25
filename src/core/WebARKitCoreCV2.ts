@@ -81,7 +81,7 @@ export class WebARKitCoreCV {
       return;
     }
     console.log("msg-imagedata while Tracking...", msg.imagedata);
-    console.log("width and height from msg: ", msg.vWidth, msg.vHeight)
+    console.log("width and height from msg: ", msg.vWidth, msg.vHeight);
     // Use provided video width/height (sent by the main thread). Previously
     // this was hard-coded to 320x240 which causes ImageData construction to
     // throw if the buffer length doesn't match. Fall back to 320x240 when
@@ -151,7 +151,9 @@ export class WebARKitCoreCV {
 
         const filterArr = [];
         for (let i = 0; i < status.rows; i++)
-          filterArr.push(status.charAt(i, 0) === 1 && errors.floatAt(i, 0) < 10);
+          filterArr.push(
+            status.charAt(i, 0) === 1 && errors.floatAt(i, 0) < 10,
+          );
 
         trainPointsMat = this.filter(nextPoints, filterArr);
         queryPointsMat = this.filter(
@@ -162,10 +164,14 @@ export class WebARKitCoreCV {
         // Log helpful diagnostic info and clear memory so we fall back to
         // descriptor-based matching on the next iteration instead of crashing.
         // eslint-disable-next-line no-console
-        console.warn("calcOpticalFlowPyrLK failed, skipping optical flow:", err, {
-          lastFrame: this.memoryData[id].lastFrame,
-          trainPointsMat: this.memoryData[id].trainPointsMat,
-        });
+        console.warn(
+          "calcOpticalFlowPyrLK failed, skipping optical flow:",
+          err,
+          {
+            lastFrame: this.memoryData[id].lastFrame,
+            trainPointsMat: this.memoryData[id].trainPointsMat,
+          },
+        );
 
         // ensure we don't leak the Mats we created
         try {
