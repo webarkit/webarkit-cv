@@ -182,6 +182,50 @@ export class CameraViewRenderer implements ICameraViewRenderer {
     return new ImageData(this.imageDataCache.slice(), this.pw, this.ph);
   }
 
+  /**
+   * Draw the detected corners on the processing canvas.
+   * corners must be an array of 8 numbers: [x0,y0,x1,y1,x2,y2,x3,y3]
+   */
+  public drawCorners(corners: number[] | null, color: string = "lime", lineWidth: number = 2): void {
+    if (!corners || corners.length < 8) return;
+    const ctx = this.context_process;
+    try {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = lineWidth;
+
+      ctx.beginPath();
+      ctx.moveTo(corners[0], corners[1]);
+      ctx.lineTo(corners[2], corners[3]);
+      ctx.lineTo(corners[4], corners[5]);
+      ctx.lineTo(corners[6], corners[7]);
+      ctx.closePath();
+      ctx.stroke();
+
+      // draw small circles at corners
+      for (let i = 0; i < 8; i += 2) {
+        const x = corners[i];
+        const y = corners[i + 1];
+        ctx.beginPath();
+        if (typeof ctx.arc === "function") {
+          ctx.arc(x, y, 3, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // fallback for mocked contexts that don't implement arc
+          ctx.fillRect(x - 2, y - 2, 4, 4);
+        }
+      }
+
+      ctx.restore();
+    } catch (e) {
+      // swallow errors to avoid breaking callers; drawing is optional
+      // but log to console for debugging
+      // eslint-disable-next-line no-console
+      console.warn("drawCorners failed:", e);
+    }
+  }
+
   public prepareImage(): void {
     this.vw = this._video.videoWidth;
     this.vh = this._video.videoHeight;
