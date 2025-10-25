@@ -39,6 +39,23 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
         }
         this._processing = true;
         console.log("WebARKitCVOrbWorker process imagedata: ", imagedata);
+        // Validate ImageData buffer size before posting to worker. This helps
+        // catch mismatches early (for example when the processing canvas size is
+        // different from the video dimensions). We log a clear warning so callers
+        // can fix the producer rather than relying on worker-side fallbacks.
+        try {
+            const bufLen = imagedata.data?.buffer?.byteLength ?? 0;
+            const expected = 4 * imagedata.width * imagedata.height;
+            if (bufLen !== expected) {
+                // eslint-disable-next-line no-console
+                console.warn(`Posting ImageData to worker: buffer length (${bufLen}) !== 4*width*height (${expected}). This will likely cause an error in the worker.`, { bufLen, width: imagedata.width, height: imagedata.height });
+            }
+        }
+        catch (e) {
+            // Non-fatal: just log and continue
+            // eslint-disable-next-line no-console
+            console.warn("Failed to validate ImageData buffer length:", e);
+        }
         this.worker.postMessage({
             type: "process",
             // send the actual ImageData buffer and its width/height so the worker

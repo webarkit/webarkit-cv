@@ -91,40 +91,21 @@ export class WebARKitCoreCV {
 
     const buf = new Uint8ClampedArray(msg.imagedata);
     const expectedLen = 4 * width * height;
+
+    // Strict validation: don't silently slice/pad mismatched buffers. If the
+    // buffer length doesn't match the expected 4*width*height, log an error
+    // and abort processing this frame. This makes debugging easier and avoids
+    // silently corrupting frames.
     if (buf.length !== expectedLen) {
-      // If the incoming buffer length doesn't match, log a warning and try
-      // to infer a matching width/height by using the provided vWidth or
-      // falling back to a best-effort width derived from the buffer length.
-      // This makes the worker more robust to mismatched sizes from the host.
       // eslint-disable-next-line no-console
-      console.warn(
-        `ImageData buffer length (${buf.length}) does not match 4*width*height (${expectedLen}). Falling back to derived dimensions.",`,
+      console.error(
+        `ImageData buffer length (${buf.length}) does not match 4*width*height (${expectedLen}).`,
         { bufLen: buf.length, width, height },
       );
-
-      // Derive width from vWidth when available, otherwise try to compute
-      // a width assuming a common aspect ratio. Keep width integer.
-      let derivedWidth = width;
-      let derivedHeight = height;
-      if (!Number.isFinite(msg.vWidth) || !Number.isFinite(msg.vHeight)) {
-        // try to infer width from buffer length: pick width = Math.floor(Math.sqrt(bufLen/4))
-        const pixels = Math.floor(buf.length / 4);
-        derivedWidth = Math.max(1, Math.floor(Math.sqrt(pixels)));
-        derivedHeight = Math.max(1, Math.floor(pixels / derivedWidth));
-      }
-
-      // If still mismatched, slice or pad the buffer to expected size for
-      // the derived dimensions to avoid ImageData construction exceptions.
-      const derivedExpected = 4 * derivedWidth * derivedHeight;
-      let finalBuf;
-      if (buf.length > derivedExpected) finalBuf = buf.slice(0, derivedExpected);
-      else if (buf.length < derivedExpected) {
-        finalBuf = new Uint8ClampedArray(derivedExpected);
-        finalBuf.set(buf);
-      } else finalBuf = buf;
-
-      const imageData = new ImageData(finalBuf, derivedWidth, derivedHeight);
-      return this.estimateCameraPosition({ id: 0, imageData: imageData });
+      // Clear memory/state for this id to avoid reusing possibly invalid mats
+      // on subsequent frames and bail out.
+      if (this.memoryData[id]) this.clearMemory(this.memoryData[id]);
+      return;
     }
 
     const imageData = new ImageData(buf, width, height);
