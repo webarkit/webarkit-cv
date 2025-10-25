@@ -186,7 +186,11 @@ export class CameraViewRenderer implements ICameraViewRenderer {
    * Draw the detected corners on the processing canvas.
    * corners must be an array of 8 numbers: [x0,y0,x1,y1,x2,y2,x3,y3]
    */
-  public drawCorners(corners: number[] | null, color: string = "lime", lineWidth: number = 2): void {
+  public drawCorners(
+    corners: number[] | null,
+    color: string = "lime",
+    lineWidth: number = 2,
+  ): void {
     if (!corners || corners.length < 8) return;
     const ctx = this.context_process;
     try {
