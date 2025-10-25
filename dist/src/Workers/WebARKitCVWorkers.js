@@ -41,9 +41,11 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
         console.log("WebARKitCVOrbWorker process imagedata: ", imagedata);
         this.worker.postMessage({
             type: "process",
+            // send the actual ImageData buffer and its width/height so the worker
+            // can reconstruct the ImageData exactly as produced by the renderer.
             imagedata: imagedata.data.buffer,
-            vWidth: this.vw,
-            vHeight: this.vh,
+            vWidth: imagedata.width,
+            vHeight: imagedata.height,
         });
     }
     loadTrackables() {
