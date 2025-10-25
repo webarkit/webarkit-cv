@@ -35,7 +35,7 @@
                 console.log(t);
                 var imgElem = document.getElementById("face");
                 window.addEventListener("getMatrix", function (e) {
-                    console.log(e.detail);
+                    console.log('%c detected and tracked: %o', 'background: orange; color: #000; padding: 2px 4px; border-radius: 3px;', e.detail);
                     //transformElem(e.detail.matrix, imgElem);
                     //drawCorners(e.detail.corners);
                     drawOverlay(e.detail.finalImage);

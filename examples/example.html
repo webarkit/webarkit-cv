@@ -55,8 +55,41 @@
                     webarkit.track(track.trackers, cameraView.image).then((t) => {
                         console.log('tracker: ', t);
                         window.addEventListener("getMatrix", function (e) {
-                            console.log('infos from getMatix Event: ', e.detail);
+                            console.log('%c infos from getMatrix Event: %o', 'background: orange; color: #000; padding: 2px 4px; border-radius: 3px;', e.detail);
                             drawOverlay(e.detail.finalImage);
+                            // If corners are provided, draw them on the overlay and
+                            // also call cameraView.drawCorners (internal canvas)
+                            try {
+                                const corners = e.detail.corners;
+                                if (corners && Array.isArray(corners) && corners.length >= 8) {
+                                    // draw on overlay so the user sees it
+                                    const overlayCtx = overlayCanvas.getContext('2d');
+                                    overlayCtx.save();
+                                    overlayCtx.strokeStyle = 'lime';
+                                    overlayCtx.fillStyle = 'lime';
+                                    overlayCtx.lineWidth = 3;
+                                    overlayCtx.beginPath();
+                                    overlayCtx.moveTo(corners[0], corners[1]);
+                                    overlayCtx.lineTo(corners[2], corners[3]);
+                                    overlayCtx.lineTo(corners[4], corners[5]);
+                                    overlayCtx.lineTo(corners[6], corners[7]);
+                                    overlayCtx.closePath();
+                                    overlayCtx.stroke();
+                                    for (let i = 0; i < 8; i += 2) {
+                                        overlayCtx.beginPath();
+                                        overlayCtx.arc(corners[i], corners[i+1], 5, 0, Math.PI*2);
+                                        overlayCtx.fill();
+                                    }
+                                    overlayCtx.restore();
+
+                                    // also call cameraView.drawCorners for completeness
+                                    if (typeof cameraView.drawCorners === 'function') {
+                                        cameraView.drawCorners(corners);
+                                    }
+                                }
+                            } catch (err) {
+                                console.warn('Error drawing corners on overlay', err);
+                            }
                         })
                         window.addEventListener("lostMarker", function (e) {
                             console.log('infos from lostMarker Event: ', e.detail);
