@@ -32,7 +32,7 @@
         if (track.isLoaded) {
             var imgData = imread("rotate");
             webarkit.track(track.trackers, imgData).then((t) => {
-                console.log(t);
+                //console.log(t);
                 var imgElem = document.getElementById("face");
                 window.addEventListener("getMatrix", function (e) {
                     console.log('%c detected and tracked: %o', 'background: orange; color: #000; padding: 2px 4px; border-radius: 3px;', e.detail);

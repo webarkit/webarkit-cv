@@ -14,7 +14,7 @@ ctx.onmessage = (e) => {
         case "process": {
             next = msg.imagedata;
             _msg = msg;
-            console.log("next...", next);
+            //console.log("next...", next);
             process(msg);
         }
     }
@@ -49,7 +49,7 @@ const process = (msg) => {
     markerResult = null;
     if (ocv && ocv.track) {
         markerResult = ocv.track(msg);
-        console.log("result...", markerResult);
+        //console.log("result...", markerResult);
     }
     if (markerResult && typeof markerResult === "object" && markerResult.type) {
         ctx.postMessage(markerResult);

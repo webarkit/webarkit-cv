@@ -55,13 +55,13 @@ export class WebARKitCoreCV {
         const imgGray = this.convertToGray(img);
         img.delete();
         const keypointsData = this.getImageKeypoints(imgGray);
-        console.log(keypointsData);
-        console.log("memoryData: ", this.memoryData);
+        //console.log(keypointsData);
+        //console.log("memoryData: ", this.memoryData);
         this.memoryData.push({ keypointsData });
         return { id: this.memoryData.length - 1 };
     }
     track(msg) {
-        console.log("Tracking...", msg);
+        //console.log("Tracking...", msg);
         if (!msg.imagedata) {
             return;
         }
@@ -72,8 +72,8 @@ export class WebARKitCoreCV {
             console.warn(`Received tracking data for id ${id}, but memoryData has no entry. Skipping frame.`, { availableIds: this.memoryData.map((_, idx) => idx) });
             return;
         }
-        console.log("msg-imagedata while Tracking...", msg.imagedata);
-        console.log("width and height from msg: ", msg.vWidth, msg.vHeight);
+        //console.log("msg-imagedata while Tracking...", msg.imagedata);
+        //console.log("width and height from msg: ", msg.vWidth, msg.vHeight);
         // Use provided video width/height (sent by the main thread). Previously
         // this was hard-coded to 320x240 which causes ImageData construction to
         // throw if the buffer length doesn't match. Fall back to 320x240 when
@@ -250,7 +250,7 @@ export class WebARKitCoreCV {
         const _axis = [0, 0, 0, 1, 30, 0, 0, 1, 0, 30, 0, 1, 0, 0, -30, 1];
         const axisT = cv2.matFromArray(4, 4, cv2.CV_64F, _axis);
         const axis = axisT.t();
-        console.log(projectionMatrix);
+        //console.log(projectionMatrix);
         const pointsT = this.dot(projectionMatrix, axis);
         const points = pointsT.t();
         const pointsArr = [];

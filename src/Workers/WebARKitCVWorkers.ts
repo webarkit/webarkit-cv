@@ -57,7 +57,7 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
     }
     this._processing = true;
 
-    console.log("WebARKitCVOrbWorker process imagedata: ", imagedata);
+    // console.log("WebARKitCVOrbWorker process imagedata: ", imagedata);
 
     // Validate ImageData buffer size before posting to worker. This helps
     // catch mismatches early (for example when the processing canvas size is
@@ -133,7 +133,7 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
         this.target.dispatchEvent(nftTrackingLostEvent);*/
       //}
       finalImage = new ImageData(this.vw, this.vh);
-      console.log("finalImage: ", finalImage);
+      // console.log("finalImage: ", finalImage);
       const lostEvent = new CustomEvent<object>("lostMarker", {
         detail: { matrix: null, corners: null, finalImage: finalImage },
       });

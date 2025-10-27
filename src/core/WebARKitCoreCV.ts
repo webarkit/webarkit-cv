@@ -67,8 +67,8 @@ export class WebARKitCoreCV {
     img.delete();
 
     const keypointsData = this.getImageKeypoints(imgGray);
-    console.log(keypointsData);
-    console.log("memoryData: ", this.memoryData);
+    // console.log(keypointsData);
+    // console.log("memoryData: ", this.memoryData);
 
     this.memoryData.push({ keypointsData });
 
@@ -76,7 +76,7 @@ export class WebARKitCoreCV {
   }
 
   track(msg: any) {
-    console.log("Tracking...", msg);
+    // console.log("Tracking...", msg);
     if (!msg.imagedata) {
       return;
     }
@@ -92,8 +92,8 @@ export class WebARKitCoreCV {
       return;
     }
 
-    console.log("msg-imagedata while Tracking...", msg.imagedata);
-    console.log("width and height from msg: ", msg.vWidth, msg.vHeight);
+    //console.log("msg-imagedata while Tracking...", msg.imagedata);
+    //console.log("width and height from msg: ", msg.vWidth, msg.vHeight);
     // Use provided video width/height (sent by the main thread). Previously
     // this was hard-coded to 320x240 which causes ImageData construction to
     // throw if the buffer length doesn't match. Fall back to 320x240 when
@@ -328,7 +328,7 @@ export class WebARKitCoreCV {
     const axisT = cv2.matFromArray(4, 4, cv2.CV_64F, _axis);
     const axis = axisT.t();
 
-    console.log(projectionMatrix);
+    // console.log(projectionMatrix);
 
     const pointsT = this.dot(projectionMatrix, axis);
     const points = pointsT.t();
