@@ -49,6 +49,7 @@ export class CameraViewRenderer {
     target;
     targetFrameRate = 60;
     imageDataCache;
+    cachedImageData;
     _frame;
     lastCache = 0;
     preserveImageSize = false;
@@ -62,6 +63,8 @@ export class CameraViewRenderer {
         this._video = video;
         this.target = window || global;
         this._frame = 0;
+        this.imageDataCache = null;
+        this.cachedImageData = null;
     }
     // Getters
     get facing() {
@@ -207,23 +210,31 @@ export class CameraViewRenderer {
         this.canvas_process.height = this.ph;
         this.context_process.fillStyle = "black";
         this.context_process.fillRect(0, 0, this.pw, this.ph);
+        // processing dimensions changed, invalidate caches so we rebuild them lazily
+        this.imageDataCache = null;
+        this.cachedImageData = null;
     }
     updateImageCache(imageData) {
         const size = imageData.data.length;
         if (!this.imageDataCache ||
-            this.imageDataCache.width !== this.pw ||
-            this.imageDataCache.height !== this.ph ||
-            this.imageDataCache.data.length !== size) {
-            this.imageDataCache = new ImageData(new Uint8ClampedArray(size), this.pw, this.ph);
+            this.imageDataCache.length !== size) {
+            this.imageDataCache = new Uint8ClampedArray(new ArrayBuffer(size));
+            this.cachedImageData = null;
         }
-        this.imageDataCache.data.set(imageData.data);
+        this.imageDataCache.set(imageData.data);
     }
     getCachedImage() {
         if (!this.imageDataCache) {
             const size = this.pw * this.ph * 4;
-            this.imageDataCache = new ImageData(new Uint8ClampedArray(size), this.pw, this.ph);
+            this.imageDataCache = new Uint8ClampedArray(new ArrayBuffer(size));
+            this.cachedImageData = null;
         }
-        return this.imageDataCache;
+        if (!this.cachedImageData ||
+            this.cachedImageData.width !== this.pw ||
+            this.cachedImageData.height !== this.ph) {
+            this.cachedImageData = new ImageData(this.imageDataCache, this.pw, this.ph);
+        }
+        return this.cachedImageData;
     }
     async initialize(videoSettings) {
         this._facing = videoSettings.facingMode || "environment";
