@@ -70,7 +70,8 @@ export class CameraViewRenderer implements ICameraViewRenderer {
 
   private target: EventTarget;
   private targetFrameRate: number = 60;
-  private imageDataCache: ImageData | null;
+  private imageDataCache: Uint8ClampedArray | null;
+  private cachedImageData: ImageData | null;
   private _frame: number;
 
   private lastCache: number = 0;
@@ -86,6 +87,8 @@ export class CameraViewRenderer implements ICameraViewRenderer {
     this._video = video;
     this.target = window || global;
     this._frame = 0;
+    this.imageDataCache = null;
+    this.cachedImageData = null;
   }
 
   // Getters
@@ -284,35 +287,42 @@ export class CameraViewRenderer implements ICameraViewRenderer {
 
     this.context_process.fillStyle = "black";
     this.context_process.fillRect(0, 0, this.pw, this.ph);
+
+    // processing dimensions changed, invalidate caches so we rebuild them lazily
+    this.imageDataCache = null;
+    this.cachedImageData = null;
   }
 
   private updateImageCache(imageData: ImageData): void {
     const size = imageData.data.length;
     if (
       !this.imageDataCache ||
-      this.imageDataCache.width !== this.pw ||
-      this.imageDataCache.height !== this.ph ||
-      this.imageDataCache.data.length !== size
+      this.imageDataCache.length !== size
     ) {
-      this.imageDataCache = new ImageData(
-        new Uint8ClampedArray(size),
-        this.pw,
-        this.ph,
-      );
+      this.imageDataCache = new Uint8ClampedArray(new ArrayBuffer(size));
+      this.cachedImageData = null;
     }
-    this.imageDataCache.data.set(imageData.data);
+    this.imageDataCache.set(imageData.data);
   }
 
   private getCachedImage(): ImageData {
     if (!this.imageDataCache) {
       const size = this.pw * this.ph * 4;
-      this.imageDataCache = new ImageData(
-        new Uint8ClampedArray(size),
+  this.imageDataCache = new Uint8ClampedArray(new ArrayBuffer(size));
+      this.cachedImageData = null;
+    }
+    if (
+      !this.cachedImageData ||
+      this.cachedImageData.width !== this.pw ||
+      this.cachedImageData.height !== this.ph
+    ) {
+      this.cachedImageData = new ImageData(
+        this.imageDataCache as unknown as ImageDataArray,
         this.pw,
         this.ph,
       );
     }
-    return this.imageDataCache;
+    return this.cachedImageData;
   }
 
   public async initialize(videoSettings: VideoSettingData): Promise<boolean> {

@@ -26,6 +26,7 @@ export declare class CameraViewRenderer implements ICameraViewRenderer {
     private target;
     private targetFrameRate;
     private imageDataCache;
+    private cachedImageData;
     private _frame;
     private lastCache;
     private preserveImageSize;
