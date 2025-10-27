@@ -51,6 +51,8 @@ export class CameraViewRenderer {
     imageDataCache;
     _frame;
     lastCache = 0;
+    preserveImageSize = false;
+    targetLongSide = 320;
     constructor(video) {
         this.canvas_process = document.createElement("canvas");
         this.context_process = this.canvas_process.getContext("2d", {
@@ -83,6 +85,32 @@ export class CameraViewRenderer {
     get contextProcess() {
         return this.context_process;
     }
+    /**
+     * Preserve the processing canvas size as the original video frame size when true.
+     * By default the processing canvas is resized to 320px max dimension to reduce computation.
+     * @param preserve use original video dimensions when preparing frames
+     */
+    setPreserveImageSize(preserve) {
+        this.preserveImageSize = preserve;
+    }
+    /**
+     * Set the target size (longest side) of the processing canvas when
+     * preserveImageSize is false. Defaults to 320.
+     */
+    setTargetLongSideLength(size) {
+        if (size && size > 0) {
+            this.targetLongSide = size;
+        }
+    }
+    /**
+     * Set the maximum capture frequency (frames per second) when sampling the
+     * video into ImageData. Lower values reduce CPU usage.
+     */
+    setTargetFrameRate(fps) {
+        if (typeof fps === "number" && fps > 0) {
+            this.targetFrameRate = fps;
+        }
+    }
     getFrame() {
         return this._frame;
     }
@@ -90,33 +118,23 @@ export class CameraViewRenderer {
         const now = Date.now();
         if (now - this.lastCache > 1000 / this.targetFrameRate) {
             this.context_process.drawImage(this.video, 0, 0, this.vw, this.vh, this.ox, this.oy, this.w, this.h);
-            const imageData = this.context_process.getImageData(0, 0, this.pw, this.ph);
-            if (this.imageDataCache == null) {
-                this.imageDataCache = imageData.data;
-            }
-            else {
-                this.imageDataCache.set(imageData.data);
-            }
+            const captured = this.context_process.getImageData(0, 0, this.pw, this.ph);
+            this.updateImageCache(captured);
             this.lastCache = now;
             this._frame++;
         }
-        return new ImageData(this.imageDataCache.slice(), this.pw, this.ph);
+        return this.getCachedImage();
     }
     get image() {
         const now = Date.now();
         if (now - this.lastCache > 1000 / this.targetFrameRate) {
             this.context_process.drawImage(this.video, 0, 0, this.vw, this.vh, this.ox, this.oy, this.w, this.h);
-            const imageData = this.context_process.getImageData(0, 0, this.pw, this.ph);
-            if (this.imageDataCache == null) {
-                this.imageDataCache = imageData.data;
-            }
-            else {
-                this.imageDataCache.set(imageData.data);
-            }
+            const captured = this.context_process.getImageData(0, 0, this.pw, this.ph);
+            this.updateImageCache(captured);
             this.lastCache = now;
             this._frame++;
         }
-        return new ImageData(this.imageDataCache.slice(), this.pw, this.ph);
+        return this.getCachedImage();
     }
     /**
      * Draw the detected corners on the processing canvas.
@@ -164,18 +182,48 @@ export class CameraViewRenderer {
     prepareImage() {
         this.vw = this._video.videoWidth;
         this.vh = this._video.videoHeight;
-        const pscale = 320 / Math.max(this.vw, (this.vh / 3) * 4);
-        // Void float point
-        this.w = Math.floor(this.vw * pscale);
-        this.h = Math.floor(this.vh * pscale);
-        this.pw = Math.floor(Math.max(this.w, (this.h / 3) * 4));
-        this.ph = Math.floor(Math.max(this.h, (this.w / 4) * 3));
-        this.ox = Math.floor((this.pw - this.w) / 2);
-        this.oy = Math.floor((this.ph - this.h) / 2);
+        if (this.preserveImageSize || !this.vw || !this.vh) {
+            // Use original video dimensions as processing size.
+            this.w = this.vw;
+            this.h = this.vh;
+            this.pw = this.vw;
+            this.ph = this.vh;
+            this.ox = 0;
+            this.oy = 0;
+        }
+        else {
+            const longSideTarget = Math.max(1, this.targetLongSide);
+            const scale = longSideTarget / Math.max(this.vw, this.vh);
+            const pscale = scale <= 1 ? scale : 1;
+            // Void float point
+            this.w = Math.floor(this.vw * pscale);
+            this.h = Math.floor(this.vh * pscale);
+            this.pw = Math.floor(Math.max(this.w, (this.h / 3) * 4));
+            this.ph = Math.floor(Math.max(this.h, (this.w / 4) * 3));
+            this.ox = Math.floor((this.pw - this.w) / 2);
+            this.oy = Math.floor((this.ph - this.h) / 2);
+        }
         this.canvas_process.width = this.pw;
         this.canvas_process.height = this.ph;
         this.context_process.fillStyle = "black";
         this.context_process.fillRect(0, 0, this.pw, this.ph);
+    }
+    updateImageCache(imageData) {
+        const size = imageData.data.length;
+        if (!this.imageDataCache ||
+            this.imageDataCache.width !== this.pw ||
+            this.imageDataCache.height !== this.ph ||
+            this.imageDataCache.data.length !== size) {
+            this.imageDataCache = new ImageData(new Uint8ClampedArray(size), this.pw, this.ph);
+        }
+        this.imageDataCache.data.set(imageData.data);
+    }
+    getCachedImage() {
+        if (!this.imageDataCache) {
+            const size = this.pw * this.ph * 4;
+            this.imageDataCache = new ImageData(new Uint8ClampedArray(size), this.pw, this.ph);
+        }
+        return this.imageDataCache;
     }
     async initialize(videoSettings) {
         this._facing = videoSettings.facingMode || "environment";

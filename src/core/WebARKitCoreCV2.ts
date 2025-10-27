@@ -494,11 +494,12 @@ export class WebARKitCoreCV {
           "Bad number of channels (Source image must have 1, 3 or 4 channels)",
         );
     }
-    const clampedArray = new ImageData(
-      new Uint8ClampedArray(img.data),
-      img.cols,
-      img.rows,
-    );
+    const channels = img.channels ? img.channels() : 4;
+    const length = Math.max(0, img.cols * img.rows * channels);
+    const view = new Uint8Array(img.data.buffer, img.data.byteOffset, length);
+    const copy = new Uint8ClampedArray(length);
+    copy.set(view);
+    const clampedArray = new ImageData(copy, img.cols, img.rows);
     img.delete();
     mat.delete();
     return clampedArray;

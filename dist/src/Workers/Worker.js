@@ -51,11 +51,15 @@ const process = (msg) => {
         markerResult = ocv.track(msg);
         console.log("result...", markerResult);
     }
-    if (markerResult != null) {
+    if (markerResult && typeof markerResult === "object" && markerResult.type) {
         ctx.postMessage(markerResult);
     }
     else {
-        ctx.postMessage({ type: "not found", markerResult });
+        const payload = { type: "not found", markerResult: null };
+        if (markerResult instanceof ImageData) {
+            payload.finalImage = markerResult;
+        }
+        ctx.postMessage(payload);
     }
     next = null;
 };

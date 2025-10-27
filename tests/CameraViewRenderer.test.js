@@ -55,3 +55,25 @@ describe('CameraViewRenderer.drawCorners', () => {
     expect(mockCtx.beginPath).not.toHaveBeenCalled();
   });
 });
+
+describe('CameraViewRenderer prepareImage', () => {
+  test('respects preserve image size flag', () => {
+    const video = document.createElement('video');
+    Object.defineProperty(video, 'videoWidth', {
+      value: 640,
+      configurable: true,
+    });
+    Object.defineProperty(video, 'videoHeight', {
+      value: 480,
+      configurable: true,
+    });
+
+    const renderer = new CameraViewRenderer(video);
+    renderer.setPreserveImageSize(true);
+
+    renderer.prepareImage();
+
+    expect(renderer.canvasProcess.width).toBe(640);
+    expect(renderer.canvasProcess.height).toBe(480);
+  });
+});
