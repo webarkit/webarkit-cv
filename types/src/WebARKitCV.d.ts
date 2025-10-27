@@ -6,6 +6,7 @@ export declare class WebARKitCV implements WebARKitCVBuilder {
     private readonly version;
     private trackableCount;
     private trackableWorkers;
+    private animationFrameId;
     /**
      * WebARKitCV constructor it implements the WebARKitCVBuilder interface.
      * The class implements the Builder pattern to create a WebARKitCV object.
@@ -69,4 +70,5 @@ export declare class WebARKitCV implements WebARKitCVBuilder {
      * Clear the WebARKitCV object. Used internally.
      */
     private clear;
+    stopTracking(): void;
 }

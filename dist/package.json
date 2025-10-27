@@ -1,54 +1,54 @@
 {
-  "name": "@webarkit/webarkit-cv",
-  "version": "0.1.1",
-  "description": "A nice project based on OpenCV to develop WebAR applications.",
-  "main": "dist/webarkitCV.js",
-  "types": "types/src/index.d.ts",
-  "devDependencies": {
-    "@babel/core": "^7.26.0",
-    "@babel/preset-env": "^7.26.0",
-    "@jest/globals": "^29.7.0",
-    "@types/uuid": "^10.0.0",
-    "babel-loader": "^9.2.1",
-    "jest-environment-jsdom": "^29.7.0",
-    "prettier": "^3.4.1",
-    "rimraf": "^6.0.1",
-    "ts-jest": "^29.2.5",
-    "ts-loader": "^9.5.1",
-    "typedoc": "^0.27.2",
-    "typescript": "^5.7.2",
-    "webpack": "^5.97.0",
-    "webpack-cli": "^5.1.4",
-    "worker-loader": "^3.0.8"
-  },
-  "scripts": {
-    "build-ts": "rimraf ./dist && tsc && webpack --mode production",
-    "dev-ts": "rimraf ./dist && tsc && webpack --mode development --progress --watch",
-    "docs": "typedoc",
-    "test": "jest",
-    "format-check": "prettier --check .",
-    "format": "prettier --write ."
-  },
-  "author": {
-    "name": "Walter Perdan",
-    "email": "github@kalwaltart.it",
-    "url": "https://www.kalwaltart.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/webarkit/webarkit-cv"
-  },
-  "homepage": "https://github.com/webarkit/webarkit-cv",
-  "contributors": [
-    "Github Contributors (https://github.com/webarkit/webarkit-cv/graphs/contributors)"
-  ],
-  "bugs": {
-    "url": "https://github.com/webarkit/webarkit-cv/issues"
-  },
-  "license": "LGPL-3.0-or-later",
-  "dependencies": {
-    "@babel/runtime": "^7.24.5",
-    "ts-node": "^10.9.2",
-    "uuid": "^9.0.1"
-  }
+    "name": "@webarkit/webarkit-cv",
+    "version": "0.1.1",
+    "description": "A nice project based on OpenCV to develop WebAR applications.",
+    "main": "dist/webarkitCV.js",
+    "types": "types/src/index.d.ts",
+    "devDependencies": {
+        "@babel/core": "^7.26.0",
+        "@babel/preset-env": "^7.26.0",
+        "@jest/globals": "^29.7.0",
+        "@types/uuid": "^10.0.0",
+        "babel-loader": "^9.2.1",
+        "jest-environment-jsdom": "^29.7.0",
+        "prettier": "^3.4.1",
+        "rimraf": "^6.0.1",
+        "ts-jest": "^29.2.5",
+        "ts-loader": "^9.5.1",
+        "typedoc": "^0.27.2",
+        "typescript": "^5.7.2",
+        "webpack": "^5.97.0",
+        "webpack-cli": "^5.1.4",
+        "worker-loader": "^3.0.8"
+    },
+    "scripts": {
+        "build-ts": "rimraf ./dist && tsc && webpack --mode production",
+        "dev-ts": "rimraf ./dist && tsc && webpack --mode development --progress --watch",
+        "docs": "typedoc",
+        "test": "jest",
+        "format-check": "prettier --check .",
+        "format": "prettier --write ."
+    },
+    "author": {
+        "name": "Walter Perdan",
+        "email": "github@kalwaltart.it",
+        "url": "https://www.kalwaltart.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/webarkit/webarkit-cv"
+    },
+    "homepage": "https://github.com/webarkit/webarkit-cv",
+    "contributors": [
+        "Github Contributors (https://github.com/webarkit/webarkit-cv/graphs/contributors)"
+    ],
+    "bugs": {
+        "url": "https://github.com/webarkit/webarkit-cv/issues"
+    },
+    "license": "LGPL-3.0-or-later",
+    "dependencies": {
+        "@babel/runtime": "^7.24.5",
+        "ts-node": "^10.9.2",
+        "uuid": "^9.0.1"
+    }
 }

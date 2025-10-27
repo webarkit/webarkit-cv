@@ -13,6 +13,7 @@ export class WebARKitCV implements WebARKitCVBuilder {
   private readonly version: string;
   private trackableCount: number = 0;
   private trackableWorkers: WebARKitCVOrbWorker[] = [];
+  private animationFrameId: number | null = null;
   /**
    * WebARKitCV constructor it implements the WebARKitCVBuilder interface.
    * The class implements the Builder pattern to create a WebARKitCV object.
@@ -151,6 +152,7 @@ export class WebARKitCV implements WebARKitCVBuilder {
   ): Promise<Map<number, ITracker>> {
     console.info("Start tracking!");
     try {
+      this.stopTracking();
       let _update = () => {
         if (
           imgData &&
@@ -165,7 +167,7 @@ export class WebARKitCV implements WebARKitCVBuilder {
         } else {
           console.warn("imgData is invalid or empty. Skipping tracking.");
         }
-        requestAnimationFrame(_update);
+        this.animationFrameId = requestAnimationFrame(_update);
       };
 
       _update();
@@ -182,5 +184,12 @@ export class WebARKitCV implements WebARKitCVBuilder {
    */
   private clear(): void {
     this.webarkit = new WebARKitBase();
+  }
+
+  public stopTracking(): void {
+    if (this.animationFrameId != null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
   }
 }
