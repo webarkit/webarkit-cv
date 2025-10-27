@@ -216,8 +216,7 @@ export class CameraViewRenderer {
     }
     updateImageCache(imageData) {
         const size = imageData.data.length;
-        if (!this.imageDataCache ||
-            this.imageDataCache.length !== size) {
+        if (!this.imageDataCache || this.imageDataCache.length !== size) {
             this.imageDataCache = new Uint8ClampedArray(new ArrayBuffer(size));
             this.cachedImageData = null;
         }

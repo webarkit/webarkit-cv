@@ -1,2 +1,2 @@
 export default cv;
-declare function cv(cv: any): any;
+declare function cv(moduleArg?: {}): Promise<any>;
