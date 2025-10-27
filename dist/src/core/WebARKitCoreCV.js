@@ -55,13 +55,13 @@ export class WebARKitCoreCV {
         const imgGray = this.convertToGray(img);
         img.delete();
         const keypointsData = this.getImageKeypoints(imgGray);
-        //console.log(keypointsData);
-        //console.log("memoryData: ", this.memoryData);
+        // console.log(keypointsData);
+        // console.log("memoryData: ", this.memoryData);
         this.memoryData.push({ keypointsData });
         return { id: this.memoryData.length - 1 };
     }
     track(msg) {
-        //console.log("Tracking...", msg);
+        // console.log("Tracking...", msg);
         if (!msg.imagedata) {
             return;
         }
@@ -250,7 +250,7 @@ export class WebARKitCoreCV {
         const _axis = [0, 0, 0, 1, 30, 0, 0, 1, 0, 30, 0, 1, 0, 0, -30, 1];
         const axisT = cv2.matFromArray(4, 4, cv2.CV_64F, _axis);
         const axis = axisT.t();
-        //console.log(projectionMatrix);
+        // console.log(projectionMatrix);
         const pointsT = this.dot(projectionMatrix, axis);
         const points = pointsT.t();
         const pointsArr = [];

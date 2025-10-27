@@ -108,7 +108,7 @@ export class WebARKitCVOrbWorker extends AbstractWebARKitCVWorker {
               this.target.dispatchEvent(nftTrackingLostEvent);*/
             //}
             finalImage = new ImageData(this.vw, this.vh);
-            //console.log("finalImage: ", finalImage);
+            // console.log("finalImage: ", finalImage);
             const lostEvent = new CustomEvent("lostMarker", {
                 detail: { matrix: null, corners: null, finalImage: finalImage },
             });
