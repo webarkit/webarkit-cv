@@ -295,10 +295,7 @@ export class CameraViewRenderer implements ICameraViewRenderer {
 
   private updateImageCache(imageData: ImageData): void {
     const size = imageData.data.length;
-    if (
-      !this.imageDataCache ||
-      this.imageDataCache.length !== size
-    ) {
+    if (!this.imageDataCache || this.imageDataCache.length !== size) {
       this.imageDataCache = new Uint8ClampedArray(new ArrayBuffer(size));
       this.cachedImageData = null;
     }
@@ -308,7 +305,7 @@ export class CameraViewRenderer implements ICameraViewRenderer {
   private getCachedImage(): ImageData {
     if (!this.imageDataCache) {
       const size = this.pw * this.ph * 4;
-  this.imageDataCache = new Uint8ClampedArray(new ArrayBuffer(size));
+      this.imageDataCache = new Uint8ClampedArray(new ArrayBuffer(size));
       this.cachedImageData = null;
     }
     if (
