@@ -7,21 +7,29 @@
 
 # webarkit-cv
 
-A set of tools to build a custom and light opencv lib to be used in WebAR projects. This is a WIP, but at this moment opencv_js.js can be imported as a **ES6** module.
-The main goal of this project is to develop a WebAR library that can be used to build a WebAR application, based on the OpenCV library.
-We do not reccomend to use this library in production, but if you want to try it, you can clone the project and test the examples. The API and the structure of the project can change in the future, so be aware of this.
+WebARKitCV is an opinionated toolchain for producing lightweight OpenCV builds tailored to WebAR workloads. It bundles the scripts, configuration, and TypeScript helpers we use to compile our fork of OpenCV into a single-file ES module (`opencv_js.js`) that runs in modern browsers and Web Workers.
+
+The project currently targets OpenCV **4.12.0** (forked under `webarkit/opencv`) and **emsdk 3.1.69**. Expect breaking changes while we continue to tune the build for smaller payloads and a smoother developer experience; treat the artifacts as experimental until we cut a stable release.
+
+Getting started is as simple as cloning the repo, running one of the build scripts (`build.sh` on Unix, `build_w_docker.bat` on Windows), and loading the generated example pages under `examples/` to validate your environment. Feedback and contributions are welcome—see the Issues section for discussion topics and the roadmap.
 
 ## Typescript
+
 WebARKitCV is developed in the Typescript language; Type definitions are in the `types` folder.
 
 ## OpenCV and Emscripten emsdk
-We are using OpenCV version 4.7.0 (our modified fork) and emsdk 3.1.26
+
+We are using OpenCV version 4.12.0 (our modified fork) and emsdk 3.1.69
 
 ### Tools
 
-See the build.sh script. It will build the opencv_js.js lib and after it will copy in the build folder. We are trying to build a lighter opencv_js.js lib, 
-So we use a config to minimize the file size. Without this the final lib will be too big in size with features that we don't need.
-The opencv_js.js file is based on a modified version of OpenCV that let you import the OpenCV library as a ES6 module. If you are interested read this [issue](https://github.com/kalwalt/webarkit-cv/issues/1).
+See the build scripts below; each one compiles the OpenCV ES module and copies it into the `build` folder. We are trying to build a lighter `opencv_js.js`, so we use a custom config to trim features we do not currently need. The module is based on our forked OpenCV tree, which adds ES module support—details live in [issue #1](https://github.com/kalwalt/webarkit-cv/issues/1).
+
+### Build scripts
+
+- `build.sh`: native Linux workflow that assumes `emsdk`/Emscripten is installed and on your `PATH`.
+- `build_w_docker.sh`: Linux/macOS workflow that wraps the build in the official Emscripten Docker image—no local `emsdk` install required.
+- `build_w_docker.bat`: Windows PowerShell/Command Prompt variant that uses the same Docker-based flow.
 
 ### Future development
 
