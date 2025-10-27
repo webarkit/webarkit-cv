@@ -1,9 +1,15 @@
 // @ts-ignore
-import _cv from "../../build/opencv_js";
+// @ts-nocheck
+//import _cv from "../../build/opencv_js";
+import { cv2, waitCV } from "./opencv-helper";
 
 export class WebARKitCoreCV {
   private cv: any;
   private version: string;
+  private orb: any;
+  private bfMatcher: any;
+  private memoryData: any;
+  private angle: number = 45;
   private BlurSize: number = 4;
   private template_keypoints_vector: any;
   private template_descriptors: any;
@@ -25,12 +31,19 @@ export class WebARKitCoreCV {
 
   async _initialize() {
     // Create an instance of the OpenCV Emscripten C++ code.
-    this.cv = await _cv();
+    //cv2 = await _cv();
+    await waitCV();
 
     console.log("[WebARKitCoreCV]", "OpenCV initialized");
 
     this.version = "4.7.0";
     console.info("WebARKitCoreCV ", this.version);
+    //@ts-ignore
+    this.orb = new cv2.ORB(1000); // And then immediately create an ORB
+    //@ts-ignore
+    this.bfMatcher = new cv2.BFMatcher(cv2.NORM_HAMMING, true); // And at the same time the matcher
+    this.memoryData = [];
+    console.log(Object.keys(cv2));
 
     setTimeout(() => {
       this.dispatchEvent({
@@ -43,284 +56,453 @@ export class WebARKitCoreCV {
   }
 
   loadTrackables(msg: any) {
-    console.log(this.cv);
+    this.loadSourceImage(msg.data);
+  }
 
-    let src = msg.data;
-    let refRows = msg.trackableHeight;
-    let refCols = msg.trackableWidth;
+  loadSourceImage(imageData: ImageData) {
+    //@ts-ignore
+    const img = cv2.matFromImageData(imageData);
 
-    let mat = new this.cv.Mat(refRows, refCols, this.cv.CV_8UC4);
-    let grayImage = new this.cv.Mat(refRows, refCols, this.cv.CV_8UC1);
+    const imgGray = this.convertToGray(img);
+    img.delete();
 
-    mat.data.set(src.data);
+    const keypointsData = this.getImageKeypoints(imgGray);
+    console.log(keypointsData);
+    console.log("memoryData: ", this.memoryData);
 
-    this.cv.cvtColor(mat, grayImage, this.cv.COLOR_RGBA2GRAY);
+    this.memoryData.push({ keypointsData });
 
-    let ksize = new this.cv.Size(this.BlurSize, this.BlurSize);
-    let anchor = new this.cv.Point(-1, -1);
-    //cv.blur(mat, mat, ksize, anchor, cv.BORDER_DEFAULT);
-    this.template_keypoints_vector = new this.cv.KeyPointVector();
-
-    this.template_descriptors = new this.cv.Mat();
-
-    let noArray = new this.cv.Mat();
-
-    let orb = new this.cv.ORB(10000);
-
-    orb.detectAndCompute(
-      grayImage,
-      noArray,
-      this.template_keypoints_vector,
-      this.template_descriptors,
-    );
-
-    var cornersArray = new Float64Array(8);
-
-    cornersArray[0] = 0;
-    cornersArray[1] = 0;
-    cornersArray[2] = refCols;
-    cornersArray[3] = 0;
-    cornersArray[4] = refCols;
-    cornersArray[5] = refRows;
-    cornersArray[6] = 0;
-    cornersArray[7] = refRows;
-
-    this.corners = new this.cv.matFromArray(
-      2,
-      2,
-      this.cv.CV_64FC2,
-      cornersArray,
-    );
-
-    mat.delete();
-    noArray.delete();
-    orb.delete();
+    return { id: this.memoryData.length - 1 };
   }
 
   track(msg: any) {
-    var result;
-    const keyFrameImageData = msg.imagedata;
+    console.log("Tracking...", msg);
+    if (!msg.imagedata) {
+      return;
+    }
+    console.log("msg-imagedata while Tracking...", msg.imagedata);
+    console.log("width and height from msg: ", msg.vWidth, msg.vHeight);
+    // Use provided video width/height (sent by the main thread). Previously
+    // this was hard-coded to 320x240 which causes ImageData construction to
+    // throw if the buffer length doesn't match. Fall back to 320x240 when
+    // values are missing.
+    const width = Number.isFinite(msg.vWidth) ? msg.vWidth : 320;
+    const height = Number.isFinite(msg.vHeight) ? msg.vHeight : 240;
 
-    let src = new this.cv.Mat(msg.vHeight, msg.vWidth, this.cv.CV_8UC4);
-    let gray = new this.cv.Mat(msg.vHeight, msg.vWidth, this.cv.CV_8UC1);
+    const buf = new Uint8ClampedArray(msg.imagedata);
+    const expectedLen = 4 * width * height;
 
-    src.data.set(keyFrameImageData);
-
-    this.cv.cvtColor(src, gray, this.cv.COLOR_RGBA2GRAY);
-    console.log(gray);
-
-    let ksize = new this.cv.Size(this.BlurSize, this.BlurSize);
-    let anchor = new this.cv.Point(-1, -1);
-    //cv.blur(src, src, ksize, anchor, cv.BORDER_DEFAULT);
-
-    var frame_keypoints_vector = new this.cv.KeyPointVector();
-
-    var frame_descriptors = new this.cv.Mat();
-
-    var orb = new this.cv.ORB(10000);
-
-    var noArray = new this.cv.Mat();
-
-    orb.detectAndCompute(
-      gray,
-      noArray,
-      frame_keypoints_vector,
-      frame_descriptors,
-    );
-
-    var knnMatches = new this.cv.DMatchVectorVector();
-
-    let good_matches = new this.cv.DMatchVector();
-
-    var matcher = new this.cv.BFMatcher();
-    console.log("template_descriptors", this.template_descriptors);
-
-    matcher.knnMatch(
-      frame_descriptors,
-      this.template_descriptors,
-      knnMatches,
-      2,
-    );
-    var knnDistance_option = 0.7; // distance ratio threshold
-    /*var frame_keypoints = [];
-
-    var template_keypoints = [];
-
-    var matchTotal = knnMatches.size();
-
-    console.log("matchTotal: ", matchTotal);
-
-    for (var i = 0; i < matchTotal; i++) {
-      var point = knnMatches.get(i).get(0);
-      var point2 = knnMatches.get(i).get(1);
-
-      if (point.distance < 0.7 * point2.distance) {
-        var frame_point = frame_keypoints_vector.get(point.queryIdx).pt;
-
-        //frame_keypoints.push(frame_point);
-        frame_keypoints.push(frame_point.x);
-        frame_keypoints.push(frame_point.y);
-
-        var template_point = this.template_keypoints_vector.get(
-          point.trainIdx,
-        ).pt;
-
-        //template_keypoints.push(template_point);
-        template_keypoints.push(template_point.x);
-        template_keypoints.push(template_point.y);
-      }
-    }*/
-
-    let counter = 0;
-    for (let i = 0; i < knnMatches.size(); ++i) {
-      let match = knnMatches.get(i);
-      let dMatch1 = match.get(0);
-      let dMatch2 = match.get(1);
-
-      //console.log("[", i, "] ", "dMatch1: ", dMatch1, "dMatch2: ", dMatch2);
-      if (dMatch1.distance <= dMatch2.distance * knnDistance_option) {
-        //console.log("***Good Match***", "dMatch1.distance: ", dMatch1.distance, "was less than or = to: ", "dMatch2.distance * parseFloat(knnDistance_option)", dMatch2.distance * parseFloat(knnDistance_option), "dMatch2.distance: ", dMatch2.distance, "knnDistance", knnDistance_option);
-        good_matches.push_back(dMatch1);
-        counter++;
-      }
+    // Strict validation: don't silently slice/pad mismatched buffers. If the
+    // buffer length doesn't match the expected 4*width*height, log an error
+    // and abort processing this frame. This makes debugging easier and avoids
+    // silently corrupting frames.
+    if (buf.length !== expectedLen) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `ImageData buffer length (${buf.length}) does not match 4*width*height (${expectedLen}).`,
+        { bufLen: buf.length, width, height },
+      );
+      // Clear memory/state for this id to avoid reusing possibly invalid mats
+      // on subsequent frames and bail out.
+      if (this.memoryData[id]) this.clearMemory(this.memoryData[id]);
+      return;
     }
 
-    console.log(
-      "keeping ",
-      counter,
-      " points in good_matches vector out of ",
-      knnMatches.size(),
-      " contained in this match vector:",
-      knnMatches,
-    );
-    console.log("here are first 5 matches");
+    const imageData = new ImageData(buf, width, height);
+    return this.estimateCameraPosition({ id: 0, imageData: imageData });
+  }
 
-    for (let t = 0; t < knnMatches.size(); ++t) {
-      console.log("[" + t + "]", "matches: ", knnMatches.get(t));
-      if (t === 5) {
-        break;
+  private estimateCameraPosition({
+    id,
+    imageData,
+  }: {
+    id: any;
+    imageData: ImageData;
+  }) {
+    //@ts-ignore
+    const img = cv2.matFromImageData(imageData);
+    const imgGray = this.convertToGray(img);
+    img.delete();
+    //@ts-ignore
+    let finalImage = new cv2.Mat();
+    //@ts-ignore
+    cv2.cvtColor(imgGray, finalImage, cv2.COLOR_GRAY2RGB);
+
+    let queryPointsMat = null;
+    let trainPointsMat = null;
+    //console.log(memoryData[id])
+    // Use calcOpticalFlowPyrLK only when we have both the previous frame and
+    // train points available. Guard and catch errors so we don't pass
+    // undefined into the wasm binding (which causes toWireType errors).
+    if (this.memoryData[id].trainPointsMat && this.memoryData[id].lastFrame) {
+      /*@ts-ignore*/
+      const nextPoints = new cv2.Mat();
+      const status = new cv2.Mat();
+      const errors = new cv2.Mat();
+      try {
+        cv2.calcOpticalFlowPyrLK(
+          this.memoryData[id].lastFrame,
+          imgGray,
+          this.memoryData[id].trainPointsMat,
+          nextPoints,
+          status,
+          errors,
+        );
+
+        const filterArr = [];
+        for (let i = 0; i < status.rows; i++)
+          filterArr.push(
+            status.charAt(i, 0) === 1 && errors.floatAt(i, 0) < 10,
+          );
+
+        trainPointsMat = this.filter(nextPoints, filterArr);
+        queryPointsMat = this.filter(
+          this.memoryData[id].queryPointsMat,
+          filterArr,
+        );
+      } catch (err) {
+        // Log helpful diagnostic info and clear memory so we fall back to
+        // descriptor-based matching on the next iteration instead of crashing.
+        // eslint-disable-next-line no-console
+        console.warn(
+          "calcOpticalFlowPyrLK failed, skipping optical flow:",
+          err,
+          {
+            lastFrame: this.memoryData[id].lastFrame,
+            trainPointsMat: this.memoryData[id].trainPointsMat,
+          },
+        );
+
+        // ensure we don't leak the Mats we created
+        try {
+          status.delete();
+        } catch (e) {}
+        try {
+          errors.delete();
+        } catch (e) {}
+        try {
+          nextPoints.delete();
+        } catch (e) {}
+
+        // Reset stored tracking mats to force a fresh keypoint matching next
+        // frame. This avoids repeatedly calling calcOpticalFlow with invalid
+        // internal state.
+        this.clearMemory(this.memoryData[id]);
       }
+
+      try {
+        status.delete();
+      } catch (e) {}
+      try {
+        errors.delete();
+      } catch (e) {}
+      try {
+        nextPoints.delete();
+      } catch (e) {}
     }
 
-    console.log("here are first 5 good_matches");
-    for (let r = 0; r < good_matches.size(); ++r) {
-      console.log("[" + r + "]", "good_matches: ", good_matches.get(r));
-      if (r === 5) {
-        break;
-      }
+    if (!trainPointsMat) {
+      //console.log('train points false...')
+      const queryImageData = this.memoryData[id].keypointsData;
+      const trainImageData = this.getImageKeypoints(imgGray);
+
+      const a = this.matchKeypoints(queryImageData, trainImageData, 50);
+
+      queryPointsMat = a.queryPointsMat;
+      trainPointsMat = a.trainPointsMat;
+
+      trainImageData.delete();
     }
 
-    /*var frameMat = new this.cv.Mat(frame_keypoints.length/2, 1, this.cv.CV_32FC2);
-    var templateMat = new this.cv.Mat(
-      template_keypoints.length/2,
+    const k = this.memoryData[id].trainPointsMat ? 0.6 : 1;
+    if (trainPointsMat && trainPointsMat.rows > 12 * k) {
+      const mtx = this.getCameraMatrix(imgGray.rows, imgGray.cols);
+      const dist = this.getDistortion();
+
+      const rvec = new cv2.Mat();
+      const tvec = new cv2.Mat();
+
+      const inliers = new cv2.Mat();
+      cv2.solvePnPRansac(
+        queryPointsMat,
+        trainPointsMat,
+        mtx,
+        dist,
+        rvec,
+        tvec,
+        false,
+        100,
+        5.0,
+        0.99,
+        inliers,
+      );
+
+      if (inliers.rows / trainPointsMat.rows > 0.2 * k) {
+        const projectionMatrix = this.getProjectionMatrix(rvec, tvec, mtx);
+
+        const filterArr = this.generateFilterArr(queryPointsMat.rows);
+        for (let i = 0; i < inliers.rows; i++)
+          filterArr[inliers.intAt(i, 0)] = true;
+
+        this.clearMemory(this.memoryData[id]);
+        this.memoryData[id].queryPointsMat = this.filter(
+          queryPointsMat,
+          filterArr,
+        );
+        this.memoryData[id].trainPointsMat = this.filter(
+          trainPointsMat,
+          filterArr,
+        );
+
+        this.draw(finalImage, projectionMatrix);
+        this.drawPoints(finalImage, trainPointsMat);
+        console.log("Tracking  !!!!");
+        const result = {
+          type: "found",
+          matrix: JSON.stringify(projectionMatrix.data64F),
+          corners: JSON.stringify([]),
+          finalImage: this.imageDataFromMat(finalImage),
+        };
+        projectionMatrix.delete();
+        return result;
+      } else this.clearMemory(this.memoryData[id]);
+
+      mtx.delete();
+      dist.delete();
+      rvec.delete();
+      tvec.delete();
+      inliers.delete();
+    } else this.clearMemory(this.memoryData[id]);
+
+    if (queryPointsMat) queryPointsMat.delete();
+    if (trainPointsMat) trainPointsMat.delete();
+
+    if (this.memoryData[id].lastFrame) this.memoryData[id].lastFrame.delete();
+    this.memoryData[id].lastFrame = imgGray;
+
+    return this.imageDataFromMat(finalImage);
+  }
+
+  private clearMemory(memory: any) {
+    if (memory.queryPointsMat) memory.queryPointsMat.delete();
+    if (memory.trainPointsMat) memory.trainPointsMat.delete();
+    memory.trainPointsMat = null;
+    memory.queryPointsMat = null;
+  }
+
+  // Just functions to keep the code clean
+  private generateFilterArr(rows: number) {
+    const arr = [];
+    for (let i = 0; i < rows; i++) arr.push(false);
+
+    return arr;
+  }
+
+  // Filtering out Mat
+  private filter(mat: any, arr: any[]) {
+    const rows = arr.reduce((sum, flag) => (flag ? sum + 1 : sum), 0);
+    const newMat = new cv2.Mat(rows, mat.cols, mat.type());
+
+    let j = 0;
+    for (let i = 0; i < mat.rows; i++) {
+      if (arr[i]) mat.row(i).copyTo(newMat.row(j++));
+    }
+
+    return newMat;
+  }
+
+  private draw(finalImage: any, projectionMatrix: any) {
+    const _axis = [0, 0, 0, 1, 30, 0, 0, 1, 0, 30, 0, 1, 0, 0, -30, 1];
+    const axisT = cv2.matFromArray(4, 4, cv2.CV_64F, _axis);
+    const axis = axisT.t();
+
+    console.log(projectionMatrix);
+
+    const pointsT = this.dot(projectionMatrix, axis);
+    const points = pointsT.t();
+
+    const pointsArr = [];
+    for (let i = 0; i < 4; i++) {
+      pointsArr.push({
+        x: points.doubleAt(i, 0) / points.doubleAt(i, 2),
+        y: points.doubleAt(i, 1) / points.doubleAt(i, 2),
+      });
+    }
+
+    cv2.line(finalImage, pointsArr[0], pointsArr[1], [255, 0, 0, 255], 2);
+    cv2.line(finalImage, pointsArr[0], pointsArr[2], [0, 255, 0, 255], 2);
+    cv2.line(finalImage, pointsArr[0], pointsArr[3], [0, 0, 255, 255], 2);
+
+    axisT.delete();
+    axis.delete();
+    pointsT.delete();
+    points.delete();
+  }
+
+  private drawPoints(finalImage: any, mat: any) {
+    for (let i = 0; i < mat.rows; i++) {
+      cv2.circle(
+        finalImage,
+        { x: mat.floatAt(i, 0), y: mat.floatAt(i, 1) },
+        2,
+        [0, 0, 255, 0],
+      );
+    }
+  }
+
+  private getCameraMatrix(rows: number, cols: number) {
+    const f =
+      Math.hypot(cols, rows) / 2 / Math.tan(((this.angle / 2) * Math.PI) / 180);
+    //console.log(f)
+    const _mtx = [f, 0, cols / 2, 0, f, rows / 2, 0, 0, 1];
+    return cv2.matFromArray(3, 3, cv2.CV_64F, _mtx);
+  }
+
+  private getDistortion() {
+    const _dist = [0, 0, 0, 0];
+    return cv2.matFromArray(1, _dist.length, cv2.CV_64F, _dist);
+  }
+
+  private matchKeypoints(
+    queryImageData: any,
+    trainImageData: any,
+    threshold = 30,
+  ) {
+    const queryPoints = [];
+    const trainPoints = [];
+
+    const matches = new cv2.DMatchVector();
+
+    if (trainImageData.keypoints.size() > 5)
+      //console.log(trainImageData.keypoints.size())
+      this.bfMatcher.match(
+        queryImageData.descriptors,
+        trainImageData.descriptors,
+        matches,
+      );
+
+    const good_matches = [];
+    for (let i = 0; i < matches.size(); i++) {
+      if (matches.get(i).distance < threshold)
+        good_matches.push(matches.get(i));
+    }
+
+    for (let i = 0; i < good_matches.length; i++) {
+      queryPoints.push([
+        queryImageData.keypoints.get(good_matches[i].queryIdx).pt.x,
+        queryImageData.keypoints.get(good_matches[i].queryIdx).pt.y,
+        0,
+      ]);
+
+      trainPoints.push([
+        trainImageData.keypoints.get(good_matches[i].trainIdx).pt.x,
+        trainImageData.keypoints.get(good_matches[i].trainIdx).pt.y,
+      ]);
+    }
+
+    const queryPointsMat = cv2.matFromArray(
+      queryPoints.length,
       1,
-      this.cv.CV_32FC2,
+      cv2.CV_32FC3,
+      queryPoints.flat(),
+    );
+    const trainPointsMat = cv2.matFromArray(
+      trainPoints.length,
+      1,
+      cv2.CV_32FC2,
+      trainPoints.flat(),
     );
 
-    frameMat.data32F.set(frame_keypoints)
-    templateMat.data32F.set(template_keypoints)*/
+    matches.delete();
+    return { queryPointsMat, trainPointsMat };
+  }
 
-    let points1 = [];
-    let points2 = [];
-    /*for (let i = 0; i < good_matches.size(); i++) {
-        points1.push(keypoints1.get(good_matches.get(i).queryIdx).pt);
-        points2.push(keypoints2.get(good_matches.get(i).trainIdx).pt);
-    }*/
+  convertToGray(img: any) {
+    const imgGray = new cv2.Mat();
+    cv2.cvtColor(img, imgGray, cv2.COLOR_BGR2GRAY);
 
-    for (let i = 0; i < good_matches.size(); i++) {
-      points1.push(
-        frame_keypoints_vector.get(good_matches.get(i).queryIdx).pt.x,
-      );
-      points1.push(
-        frame_keypoints_vector.get(good_matches.get(i).queryIdx).pt.y,
-      );
-      points2.push(
-        this.template_keypoints_vector.get(good_matches.get(i).trainIdx).pt.x,
-      );
-      points2.push(
-        this.template_keypoints_vector.get(good_matches.get(i).trainIdx).pt.y,
-      );
+    return imgGray;
+  }
+
+  private dot(a: any, b: any) {
+    const res = new cv2.Mat();
+    const zeros = cv2.Mat.zeros(a.cols, b.rows, cv2.CV_64F);
+    cv2.gemm(a, b, 1, zeros, 0, res);
+    zeros.delete();
+
+    return res;
+  }
+
+  private getProjectionMatrix(rvec: any, tvec: any, mtx: any) {
+    const rotationMatrix = new cv2.Mat();
+    cv2.Rodrigues(rvec, rotationMatrix);
+
+    const extrinsicMatrix = new cv2.Mat(3, 4, cv2.CV_64F);
+
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        extrinsicMatrix.doublePtr(i, j)[0] = rotationMatrix.doubleAt(i, j);
+      }
+      extrinsicMatrix.doublePtr(i, 3)[0] = tvec.doubleAt(i, 0);
     }
 
-    console.log("points1:", points1, "points2:", points2);
+    const projectionMatrix = this.dot(mtx, extrinsicMatrix);
 
-    //59            Find homography
-    //60            h = findHomography( points1, points2, RANSAC );
-    //let mat1 = cv.matFromArray(points1.length, 2, cv.CV_32F, points1);
-    //let mat2 = cv.matFromArray(points2.length, 2, cv.CV_32F, points2); //32FC2
+    extrinsicMatrix.delete();
+    rotationMatrix.delete();
 
-    var mat1 = new this.cv.matFromArray(
-      points1.length,
-      1,
-      this.cv.CV_32FC3,
-      points1.flat(),
-    );
-    //mat1.data32F.set(points1);
-    var mat2 = new this.cv.matFromArray(
-      points2.length,
-      1,
-      this.cv.CV_32FC2,
-      points2.flat(),
-    );
-    //mat2.data32F.set(points2);
-    console.log("mat1: ", mat1, "mat2: ", mat2);
+    return projectionMatrix;
+  }
 
-    /*for (let i = 0; i < template_keypoints.length; i++) {
-      frameMat.data32F[i * 2] = frame_keypoints[i].x;
-      frameMat.data32F[i * 2 + 1] = frame_keypoints[i].y;
+  private getImageKeypoints(image: any) {
+    const keypoints = new cv2.KeyPointVector(); // key points
+    const none = new cv2.Mat();
+    const descriptors = new cv2.Mat(); // Point descriptors (i.e. some unique value)
+    this.orb.detectAndCompute(image, none, keypoints, descriptors);
 
-      templateMat.data32F[i * 2] = template_keypoints[i].x;
-      templateMat.data32F[i * 2 + 1] = template_keypoints[i].y;
-    }*/
+    none.delete();
 
-    //if (template_keypoints.length >= this.ValidPointTotal) {
-    if (points2.length >= this.ValidPointTotal) {
-      /*var homography = this.cv.findHomography(
-          frameMat,
-          templateMat,
-          this.cv.RANSAC,
-      );*/
-      let homography = this.cv.findHomography(mat1, mat2, this.cv.RANSAC);
-      console.log("homograpy: ", homography);
-      var valid;
-
-      valid = this.homographyValid(homography);
-      console.log(valid);
-
-      //if (this.homographyValid(homography) == true) {
-      var out = this.fill_output(homography, valid);
-      console.log("output from", out);
-      //}
-      //this.homography_transform = homography.data64F;
-      this.homography_transform = out.slice(0, 9);
-      this.corners_out = out.slice(9, 18);
-    } else {
-      this.homography_transform = null;
-      this.corners_out = null;
-    }
-
-    noArray.delete();
-    orb.delete();
-    frame_keypoints_vector.delete();
-    frame_descriptors.delete();
-    knnMatches.delete();
-    matcher.delete();
-    //templateMat.delete();
-    //frameMat.delete();
-    mat1.delete();
-    mat2.delete();
-    src.delete();
-    //frame_keypoints = <any>(<unknown>null);
-    //template_keypoints = <any>(<unknown>null);
-
-    console.log("Homography from orb detector: ", this.homography_transform);
-
-    result = {
-      type: "found",
-      matrix: JSON.stringify(this.homography_transform),
-      corners: JSON.stringify(this.corners_out),
+    const dispose = () => {
+      keypoints.delete();
+      descriptors.delete();
     };
-    return result;
+
+    return { image, keypoints, descriptors, delete: dispose };
+  }
+
+  private imageDataFromMat(mat: any) {
+    // converts the mat type to cv2.CV_8U
+    const img = new cv2.Mat();
+    const depth = mat.type() % 8;
+    const scale =
+      depth <= cv2.CV_8S ? 1.0 : depth <= cv2.CV_32S ? 1.0 / 256.0 : 255.0;
+    const shift = depth === cv2.CV_8S || depth === cv2.CV_16S ? 128.0 : 0.0;
+    mat.convertTo(img, cv2.CV_8U, scale, shift);
+
+    // converts the img type to cv.CV_8UC4
+    switch (img.type()) {
+      case cv2.CV_8UC1:
+        cv2.cvtColor(img, img, cv2.COLOR_GRAY2RGBA);
+        break;
+      case cv2.CV_8UC3:
+        cv2.cvtColor(img, img, cv2.COLOR_RGB2RGBA);
+        break;
+      case cv2.CV_8UC4:
+        break;
+      default:
+        throw new Error(
+          "Bad number of channels (Source image must have 1, 3 or 4 channels)",
+        );
+    }
+    const channels = img.channels ? img.channels() : 4;
+    const length = Math.max(0, img.cols * img.rows * channels);
+    const view = new Uint8Array(img.data.buffer, img.data.byteOffset, length);
+    const copy = new Uint8ClampedArray(length);
+    copy.set(view);
+    const clampedArray = new ImageData(copy, img.cols, img.rows);
+    img.delete();
+    mat.delete();
+    return clampedArray;
   }
 
   homographyValid(H: any) {
@@ -332,8 +514,8 @@ export class WebARKitCoreCV {
 
   fill_output = (H: any, valid: boolean) => {
     let output = new Float64Array(17);
-    let warped = new this.cv.Mat(2, 2, this.cv.CV_64FC2);
-    this.cv.perspectiveTransform(this.corners, warped, H);
+    let warped = new cv2.Mat(2, 2, cv2.CV_64FC2);
+    cv2.perspectiveTransform(this.corners, warped, H);
 
     output[0] = H.doubleAt(0, 0);
     output[1] = H.doubleAt(0, 1);
