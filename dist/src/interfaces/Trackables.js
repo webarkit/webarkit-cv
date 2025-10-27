@@ -7,13 +7,13 @@
  * @property {string} uuid - The uuid of the trackable.
  */
 export class Trackable {
-    url;
-    name;
-    uuid;
-    constructor(url, name, uuid) {
-        this.url = url;
-        this.name = name;
-        this.uuid = uuid;
-    }
+  url;
+  name;
+  uuid;
+  constructor(url, name, uuid) {
+    this.url = url;
+    this.name = name;
+    this.uuid = uuid;
+  }
 }
 //# sourceMappingURL=Trackables.js.map
