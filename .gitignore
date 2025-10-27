@@ -1,3 +1,5 @@
 opencv_js
 node_modules
 docs
+.idea/
+.vscode/
