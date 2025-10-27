@@ -80,6 +80,18 @@ export class WebARKitCoreCV {
     if (!msg.imagedata) {
       return;
     }
+
+    const id = Number.isInteger(msg.id) && msg.id >= 0 ? msg.id : 0;
+    const memory = this.memoryData[id];
+    if (!memory) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `Received tracking data for id ${id}, but memoryData has no entry. Skipping frame.`,
+        { availableIds: this.memoryData.map((_: unknown, idx: number) => idx) },
+      );
+      return;
+    }
+
     console.log("msg-imagedata while Tracking...", msg.imagedata);
     console.log("width and height from msg: ", msg.vWidth, msg.vHeight);
     // Use provided video width/height (sent by the main thread). Previously
@@ -104,12 +116,12 @@ export class WebARKitCoreCV {
       );
       // Clear memory/state for this id to avoid reusing possibly invalid mats
       // on subsequent frames and bail out.
-      if (this.memoryData[id]) this.clearMemory(this.memoryData[id]);
+      this.clearMemory(memory);
       return;
     }
 
     const imageData = new ImageData(buf, width, height);
-    return this.estimateCameraPosition({ id: 0, imageData: imageData });
+    return this.estimateCameraPosition({ id, imageData });
   }
 
   private estimateCameraPosition({
