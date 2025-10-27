@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "ES2022",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "declaration": false,
+    "types": ["jest", "node"]
+  },
+  "include": [
+    "tests-esm/**/*.ts",
+    "tests-esm/**/*.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ]
+}

@@ -6,6 +6,7 @@ module.exports = {
     testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$',
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     moduleNameMapper: {
-      "\\./Worker": "<rootDir>/__mocks__/workerMock.js"
+      "\\./Worker": "<rootDir>/__mocks__/workerMock.js",
+      "^uuid$": "<rootDir>/__mocks__/uuid.ts"
     }
   }
