@@ -266,17 +266,17 @@ export class CameraViewRenderer implements ICameraViewRenderer {
       this.ox = 0;
       this.oy = 0;
     } else {
-    const longSideTarget = Math.max(1, this.targetLongSide);
-    const scale = longSideTarget / Math.max(this.vw, this.vh);
-    const pscale = scale <= 1 ? scale : 1;
+      const longSideTarget = Math.max(1, this.targetLongSide);
+      const scale = longSideTarget / Math.max(this.vw, this.vh);
+      const pscale = scale <= 1 ? scale : 1;
 
-    // Void float point
-    this.w = Math.floor(this.vw * pscale);
-    this.h = Math.floor(this.vh * pscale);
-    this.pw = Math.floor(Math.max(this.w, (this.h / 3) * 4));
-    this.ph = Math.floor(Math.max(this.h, (this.w / 4) * 3));
-    this.ox = Math.floor((this.pw - this.w) / 2);
-    this.oy = Math.floor((this.ph - this.h) / 2);
+      // Void float point
+      this.w = Math.floor(this.vw * pscale);
+      this.h = Math.floor(this.vh * pscale);
+      this.pw = Math.floor(Math.max(this.w, (this.h / 3) * 4));
+      this.ph = Math.floor(Math.max(this.h, (this.w / 4) * 3));
+      this.ox = Math.floor((this.pw - this.w) / 2);
+      this.oy = Math.floor((this.ph - this.h) / 2);
     }
 
     this.canvas_process.width = this.pw;
@@ -306,7 +306,11 @@ export class CameraViewRenderer implements ICameraViewRenderer {
   private getCachedImage(): ImageData {
     if (!this.imageDataCache) {
       const size = this.pw * this.ph * 4;
-      this.imageDataCache = new ImageData(new Uint8ClampedArray(size), this.pw, this.ph);
+      this.imageDataCache = new ImageData(
+        new Uint8ClampedArray(size),
+        this.pw,
+        this.ph,
+      );
     }
     return this.imageDataCache;
   }
